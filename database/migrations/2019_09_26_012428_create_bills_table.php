@@ -27,6 +27,10 @@ class CreateBillsTable extends Migration
             $table->double('total')->default(0);
             $table->double('tax')->default(0);
             $table->double('base')->default(0);
+            $table->string('code')->nullable();
+            $table->string('pdf')->nullable();
+            $table->string('zip')->nullable();
+            $table->string('receipt')->nullable();
             $table->timestamps();
         });
     }

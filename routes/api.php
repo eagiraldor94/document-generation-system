@@ -22,3 +22,4 @@ Route::resource('confirmations/payu', 'PayUController')->only([
 Route::resource('disputes/payu', 'ControladorDisputas')->only([
     'store'
 ]);
+Route::get('consulta/{word}', 'ControladorBusquedas@buscarDocumentos');

@@ -21,8 +21,12 @@ session_start();
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="/Views/dist/css/adminlte.css">
+  <!-- Form fix -->
+  <link rel="stylesheet" href="/Views/dist/css/form.css">
   <!-- Google Font: Source Sans Pro -->
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Rubik&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
     <!-- iCheck for checkboxes and radio inputs -->
   <link rel="stylesheet" href="/Views/plugins/iCheck/all.css">
   <!-- Daterange picker -->
@@ -70,7 +74,7 @@ session_start();
 </head>
 <body class="hold-transition layout-top-nav">
 <!-- Site wrapper -->
-  <div class="wrapper">
+  <div class="wrapper" style="background: #F4F6F9">
     @include('layouts.menu')
     @yield('content')
     @include('layouts.footer')

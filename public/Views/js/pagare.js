@@ -1,5 +1,92 @@
 $(function(){
-
+/*==============================================
+=            AGREGAR DATOS DEL TIPO DE CUOTAS        =
+==============================================*/
+$("#tipo-cuotas").on("change",function(){
+  $("#info-cuotas").empty();
+  $("#fechas-pago").empty();
+  var tipo = $(this).val();
+  switch (tipo) {
+  case 'Personalizado':
+    $("#info-cuotas").append(
+      '<div class="row">' +
+        '<div class="form-group ml-3" style="width:47.5%">' +
+          '<div class="input-group mb-3">' +
+            '<div class="input-group-prepend d-md-inline-flex">' +
+              '<span class="input-group-text"><i class="fas fa-hashtag"></i></span>' +
+            '</div>' +
+            '<input id="cuotas-pago" type="number" class="form-control" step="1" min="1" max="60"  name="newFeesNumber" placeholder="Número de cuotas" required>' +
+          '</div>' +
+       '</div>' +
+        '<div class="form-group ml-3" style="width:47.5%">' +
+          '<div class="input-group mb-3">' +
+            '<div class="input-group-prepend d-md-inline-flex">' +
+              '<span class="input-group-text"><i class="fas fa-calculator"></i></span>' +
+            '</div>' +
+            '<select name="newFeesMix" class="form-control" required>'+
+                      '<option value="">¿Qué paga en las cuotas?</option>'+
+                      '<option value="Interés">Interés</option>'+
+                      '<option value="Capital">Capital</option>'+
+                      '<option value="Capital e interés">Capital e interés</option>'+
+            '</select>' +
+          '</div>' +
+       '</div>' +
+     '</div>'
+            );
+    break;
+  case 'Un pago':
+    break;
+  case '':
+    break;
+  default:
+    $("#info-cuotas").append(
+      '<div class="row">' +
+        '<div class="form-group ml-3" style="width:96.5%">' +
+          '<div class="input-group mb-3">' +
+            '<div class="input-group-prepend d-md-inline-flex">' +
+              '<span class="input-group-text"><i class="fas fa-calculator"></i></span>' +
+            '</div>' +
+            '<select name="newFeesMix" class="form-control" required>'+
+                      '<option value="">¿Qué paga en las cuotas?</option>'+
+                      '<option value="Interés">Interés</option>'+
+                      '<option value="Capital">Capital</option>'+
+                      '<option value="Capital e interés">Capital e interés</option>'+
+            '</select>' +
+          '</div>' +
+       '</div>' +
+     '</div>'
+            );
+    $("#fechas-pago").append(
+       '<div class="form-group ml-3" style="width:96.5%">' +
+        '<div class="input-group mb-3">' +
+            '<div class="input-group-prepend d-md-inline-flex">' +
+            '<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>' +
+            '</div>' +
+            '<input type="text" class="form-control datepicker2" name="newPaymentDate1" placeholder="Fecha de inicio de pagos" required>' +
+       '</div></div>'
+            );
+    $( ".datepicker2" ).datepicker({ format: 'dd/mm/yyyy',autoclose: true,language:'es' });
+  }
+});
+/*==============================================
+=            AGREGAR NÚMERO CUOTAS        =
+==============================================*/
+$("#info-cuotas").on("change","#cuotas-pago",function(){
+  $("#fechas-pago").empty();
+  var cuotas = $(this).val();
+  for (var i = 1; i <= cuotas; i++) {
+    $("#fechas-pago").append(
+       '<div class="form-group ml-3" style="width:47.5%">' +
+        '<div class="input-group mb-3">' +
+            '<div class="input-group-prepend d-md-inline-flex">' +
+            '<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>' +
+            '</div>' +
+            '<input type="text" class="form-control datepicker2" name="newPaymentDate'+i+'" placeholder="Fecha de pago número '+i+'" required>' +
+       '</div></div>'
+            );
+  }
+    $( ".datepicker2" ).datepicker({ format: 'dd/mm/yyyy',autoclose: true,language:'es' });
+});
 /*==============================================
 =            AGREGAR DATOS DE LA CUENTA PAGO        =
 ==============================================*/
@@ -46,24 +133,5 @@ $("#tipo-pago").on("change",function(){
     break;
   default:
   }
-});
-/*==============================================
-=            AGREGAR NÚMERO CUOTAS        =
-==============================================*/
-$("#cuotas-pago").on("change",function(){
-  $("#fechas-pago").empty();
-  var cuotas = $(this).val();
-  for (var i = 1; i <= cuotas; i++) {
-    $("#fechas-pago").append(
-       '<div class="form-group ml-3" style="width:47.5%">' +
-        '<div class="input-group mb-3">' +
-            '<div class="input-group-prepend d-md-inline-flex">' +
-            '<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>' +
-            '</div>' +
-            '<input type="text" class="form-control datepicker2" name="newPaymentDate'+i+'" placeholder="Fecha de pago número '+i+'" required>' +
-       '</div></div>'
-            );
-  }
-    $( ".datepicker2" ).datepicker();
 });
 });

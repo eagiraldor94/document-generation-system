@@ -6,7 +6,7 @@
 <script>
 	swal({
 		type: "error",
-		title: "¡Ha ocurrido un error en la validación de la firma!",
+		title: "¡Ha ocurrido un error en la validación de la autenticidad de los datos! (Codigo de referencia {{$referencia}})",
 		showConfirmButton: true,
 		confirmButtonText: "Cerrar",
 		closeOnConfirm: false

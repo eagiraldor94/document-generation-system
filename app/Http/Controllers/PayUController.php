@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 
 use ludcis;
 
+use Carbon\Carbon;
+
 class PayUController extends Controller
 {
     //
@@ -13,30 +15,136 @@ class PayUController extends Controller
     	if (isset($_POST['newPayment'])) {
     		$document = ludcis\Document::where('hash',$_POST['newCode'])->first();
     		if (is_object($document) && filter_var($_POST['newEmail'], FILTER_VALIDATE_EMAIL)) {
-
 	    		$product = $document->product;
 				$apiKey = "4Vj8eK4rloUd272L48hsrarnUA";
 	    		$base = $product->value/1.19;
 	    		$base= round($base, 0, PHP_ROUND_HALF_UP);
 	    		$tax = $product->value*0.19/1.19; 
-	    		$tax= round($tax, 0, PHP_ROUND_HALF_UP);
-				$refCode = sha1($document->hash.date('Y-m-d-H-i-s'));
-				$merchant = "508029";
-				$account = "512321";
-				$docName= $product->name;
-				$amount = $product->value;
-				$hash = $document->hash;
-				$sign = $apiKey."~".$merchant."~".$refCode."~".$amount."~COP";
-				$sign = hash("SHA256",$sign);
-				$bill = new ludcis\Bill();
-				$bill->document_id = $document->id;
-				$bill->name = $_POST['newBuyer'];
-				$bill->id_type = $_POST['newIdType'];
-				$bill->id_number = $_POST['newId'];
-				$bill->email = $_POST['newEmail'];
-				$bill->save();
+	    		$tax= round($tax, 0, PHP_ROUND_HALF_DOWN);
+    			if (isset($_POST['newDiscount']) && $_POST['newDiscount'] != "" && $_POST['newDiscount'] != null) {
+    				$discCode=$_POST['newDiscount'];
+    				$discount = ludcis\Code::where('code',$discCode)->first();
+    				if (is_object($discount))  {
+	    				if ($discount->active=="1") {
+	    					if ($discount->restricted=="1") {
+	    						switch ($discount->res_type) {
+	    							case "ip":
+	       								$ip = ControladorGeneral::obtenerIp();
+	    								// $ip = "181.141.228.221";
+	    								if ($ip==$discount->res_value) {
+				    						if ($discount->porcentual=="1") {
+									    		$base = $product->value*(1-($discount->amount/100))/1.19;
+									    		$base= round($base, 0, PHP_ROUND_HALF_UP);
+									    		$tax = $product->value*(1-($discount->amount/100))*0.19/1.19; 
+									    		$tax= round($tax, 0, PHP_ROUND_HALF_DOWN);
+				    						}else{
+									    		$base = ($product->value-$discount->amount)/1.19;
+									    		$base= round($base, 0, PHP_ROUND_HALF_UP);
+									    		$tax = ($product->value-$discount->amount)/1.19*0.19;
+									    		$tax= round($tax, 0, PHP_ROUND_HALF_DOWN);
+				    						}
+	    								}
+	    							break;
+	    							
+	    							case "date":
+	    								$hoy = Carbon::now();
+	    								$limite = Carbon::parse($discount->res_value);
+	    								if ($limite>$hoy) {
+				    						if ($discount->porcentual=="1") {
+									    		$base = $product->value*(1-($discount->amount/100))/1.19;
+									    		$base= round($base, 0, PHP_ROUND_HALF_UP);
+									    		$tax = $product->value*(1-($discount->amount/100))*0.19/1.19; 
+									    		$tax= round($tax, 0, PHP_ROUND_HALF_DOWN);
+				    						}else{
+									    		$base = ($product->value-$discount->amount)/1.19;
+									    		$base= round($base, 0, PHP_ROUND_HALF_UP);
+									    		$tax = ($product->value-$discount->amount)/1.19*0.19;
+									    		$tax= round($tax, 0, PHP_ROUND_HALF_DOWN);
+				    						}
+	    								}
+	    							break;
+	    							case "document":
+	    								if ($document->product->code == $discount->res_value) {
+				    						if ($discount->porcentual=="1") {
+									    		$base = $product->value*(1-($discount->amount/100))/1.19;
+									    		$base= round($base, 0, PHP_ROUND_HALF_UP);
+									    		$tax = $product->value*(1-($discount->amount/100))*0.19/1.19; 
+									    		$tax= round($tax, 0, PHP_ROUND_HALF_DOWN);
+				    						}else{
+									    		$base = ($product->value-$discount->amount)/1.19;
+									    		$base= round($base, 0, PHP_ROUND_HALF_UP);
+									    		$tax = ($product->value-$discount->amount)/1.19*0.19;
+									    		$tax= round($tax, 0, PHP_ROUND_HALF_DOWN);
+				    						}
+	    								}
+	    							break;
+	    							case "email":
+	    								if ($_POST['newEmail'] == $discount->res_value) {
+				    						if ($discount->porcentual=="1") {
+									    		$base = $product->value*(1-($discount->amount/100))/1.19;
+									    		$base= round($base, 0, PHP_ROUND_HALF_UP);
+									    		$tax = $product->value*(1-($discount->amount/100))*0.19/1.19; 
+									    		$tax= round($tax, 0, PHP_ROUND_HALF_DOWN);
+				    						}else{
+									    		$base = ($product->value-$discount->amount)/1.19;
+									    		$base= round($base, 0, PHP_ROUND_HALF_UP);
+									    		$tax = ($product->value-$discount->amount)/1.19*0.19;
+									    		$tax= round($tax, 0, PHP_ROUND_HALF_DOWN);
+				    						}
+	    								}
+	    							break;
+	    							default:
+	    								// code...
+	    							break;
+	    						}
+	    						
+	    					}else{
+	    						if ($discount->porcentual=="1") {
+						    		$base = $product->value*(1-($discount->amount/100))/1.19;
+						    		$base= round($base, 0, PHP_ROUND_HALF_UP);
+						    		$tax = $product->value*(1-($discount->amount/100))*0.19/1.19; 
+						    		$tax= round($tax, 0, PHP_ROUND_HALF_DOWN);
+	    						}else{
+						    		$base = $product->value/1.19;
+						    		$base = $base-$discount->amount;
+						    		$base= round($base, 0, PHP_ROUND_HALF_UP);
+						    		$tax = $product->value*0.19/1.19; 
+						    		$tax = $tax-$discount->amount;
+						    		$tax= round($tax, 0, PHP_ROUND_HALF_DOWN);
+	    						}
+	    					}
+		    				if ($discount->burnable=='1') {
+		    					$discount->active=0;
+		    					$discount->save();
+		    				}
+	    				}
+    				}
+    			}else{
+    				$discCode="";
+    			}
+    			if ($base>1500) {
+					$refCode = sha1($document->hash.date('Y-m-d-H-i-s'));
+					$merchant = "508029";
+					$account = "512321";
+					$docName= $product->name;
+					$amount = $base + $tax;
+					$hash = $document->hash;
+					$sign = $apiKey."~".$merchant."~".$refCode."~".$amount."~COP";
+					$sign = hash("SHA256",$sign);
+					$bill = new ludcis\Bill();
+					$bill->document_id = $document->id;
+					$bill->name = $_POST['newBuyer'];
+					$bill->id_type = $_POST['newIdType'];
+					$bill->id_number = $_POST['newId'];
+					$bill->email = $_POST['newEmail'];
+					$bill->code = $discCode;
+					$bill->save();
 
-	    		return view('layouts.payu_send',['post'=>$_POST,'base'=>$base,'tax'=>$tax,'refCode'=>$refCode,'merchant'=>$merchant,'account'=>$account,'docName'=>$docName,'amount'=>$amount,'hash'=>$hash,'sign'=>$sign]); 
+		    		return view('layouts.payu_send',['post'=>$_POST,'base'=>$base,'tax'=>$tax,'refCode'=>$refCode,'merchant'=>$merchant,'account'=>$account,'docName'=>$docName,'amount'=>$amount,'hash'=>$hash,'sign'=>$sign]); 
+    				
+    			}else{
+           			return view($document->product->view,['code'=>$document->hash]);
+    			}
     		}
     	}else{
     		return redirect('/');
@@ -102,6 +210,7 @@ class PayUController extends Controller
 					}
 					$bill->resolution_id = $resolution->id;
 					$bill->save();
+					$facturaPDF = ControladorDocumentos::pdfFactura($bill->id);
 				}
 				return "ok";
 			}
@@ -170,11 +279,11 @@ class PayUController extends Controller
 						}
 						$bill->resolution_id = $resolution->id;
 						$bill->save();
-						
+						$facturaPDF = ControladorDocumentos::pdfFactura($bill->id);
 					}
-					
+					return redirect('documentos/'.$document->hash);
 				}
-				return redirect('documentos/'.$document->hash);
+          		return view('layouts.not_found');
 			}
 
 			else if ($_REQUEST['transactionState'] == 6 ) {

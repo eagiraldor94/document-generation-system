@@ -3,7 +3,7 @@
 	Pagaré
 @stop
 @section('css')
-  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="/Views/plugins/datepicker/datepicker3.css">
 @stop
 @section('content')
 <!-- Content Wrapper. Contains page content -->
@@ -27,8 +27,8 @@
       <div class="content">
         <div class="container">
 <!-- Default box -->
-      <div class="card mb-5 pb-5 text-center">
-        <form role="form" method="post" enctype="multipart/form-data">
+      <div class="card mb-5 text-center">
+        <form role="form" method="post" action="pagare" enctype="multipart/form-data">
           @csrf
         <div class="card-header bg-primary d-flex justify-content-center">
           <h1 class="card-title my-auto"><b>Datos del pagaré</b></h1>
@@ -184,7 +184,6 @@
                </div>
             </div>
             <div id="cuenta-pago">
-              
             </div>
             <!-- Documento -->
             <div class="row">
@@ -196,17 +195,27 @@
                   </div>
                 </div>
                </div>
-               <div class="form-group ml-3" style="width:47.5%">
+              <div class="form-group ml-3" style="width:47.5%">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
-                    <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+                      <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
                     </div>
-                    <input id="cuotas-pago" type="number" class="form-control" step="1" min="1" max="60"  name="newFeesNumber" placeholder="Número de cuotas" required>
+                    <select id="tipo-cuotas" name="newFeesType" class="form-control" required>
+                      <option value="">Tipo de cuotas</option>
+                      <option value="Un pago">Un pago</option>
+                      <option value="Semanal">Semanal</option>
+                      <option value="Mensual">Mensual</option>
+                      <option value="Cada 2 semanas">Cada 2 semanas</option>
+                      <option value="Cada 15 días">Cada 15 días</option>
+                      <option value="Cada 30 días">Cada 30 días</option>
+                      <option value="Personalizado">Personalizado</option>
+                    </select>
                   </div>
                </div>
              </div>
+             <div id="info-cuotas">
+             </div>
              <div id="fechas-pago" class="row mx-auto">
-               
              </div>
              <div class="row">
             <!-- fecha de pago final -->
@@ -231,11 +240,9 @@
         </div>
         <div class="card-footer">
           <div class="row w-100">
-            <div class="form-group text-center" style="width: 100%">
               <div class="input-group justify-content-center">
                 <button type="submit" class="btn btn-success" name="newDocument">Descargar pagaré</button>
               </div>
-            </div>
           </div>
         </div>
         <!-- /.card-body -->
@@ -259,7 +266,8 @@
   <!-- /.control-sidebar -->
 @stop
 @section('js')
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="/Views/plugins/datepicker/bootstrap-datepicker.js"></script>
   <script src="/Views/js/datepicker.js"></script>
+  <script src="/Views/plugins/datepicker/locales/bootstrap-datepicker.es.js"></script>
   <script src="/Views/js/pagare.js"></script>
 @stop

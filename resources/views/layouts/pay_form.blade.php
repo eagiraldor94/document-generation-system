@@ -8,24 +8,25 @@
       <div class="content">
         <div class="container">
 <!-- Default box -->
-      <div class="card mb-5 pb-5 text-center">
-        <form role="form" method="post" action="pago" enctype="multipart/form-data">
+      <div class="card my-5 pb-0 text-center">
+        <form style="margin-bottom: 0px" role="form" method="post" action="/pago" enctype="multipart/form-data">
           @csrf
         <div class="card-header bg-warning d-flex justify-content-center">
-          <h1 class="card-title my-auto"><b>ESTE ES UN DOCUMENTO CON COSTO</b></h1>
+          <h2 class="my-auto" style="font-family: 'Montserrat';font-size: '28px';"><span style='font-weight: 900 !important'>ESTE ES UN DOCUMENTO CON COSTO</span></h2>
         </div>
         <div class="card-body">
             <div class="row">
                   <div class="alert alert-light w-100">
-                  <h2>El costo del documento {{$product->name}} es de $ {{number_format($product->value,2)}} COP (pesos colombianos). Este valor ya trae el iva incluido y su pago será recibido a través PayU para brindarle un entorno seguro.
-                  Sin trampas ni costes ocultos!<br>
-                  <b>Recuerde:</b> Si su pago no es por medios eléctronicos, de le enviará un correo con un enlace para la generacion de su documento tan pronto sea aprobado.</h2>
+                  <h4 style="font-family: 'Rubik',sans-serif">El costo del documento {{$product->name}} es de $ {{number_format($product->value,2)}} COP (pesos colombianos). Este valor ya trae el iva incluido y su pago será recibido a través PayU para brindarle un entorno seguro.
+                  Sin trampas ni costes ocultos!<br><br>
+                  <span style="color:#000"><b>Recuerde:</b> Si su pago no es por medios eléctronicos, se le enviará un correo con un enlace para la generacion de su documento tan pronto sea aprobado.</span><br><br>
+                  Para más información sobre el documento<br><b><a style="color:#000" target="_blank" href="{{$product->page}}">Clic aquí</a></b>.</h4>
                   <input type="hidden" name="newCode" value="{{$document->hash}}">
               </div>
             </div>
             <div class="row">
                   <div class="alert alert-secondary w-100">
-                  <h2>DATOS DE FACTURACIÓN</h2>
+                  <h3><b>DATOS DE FACTURACIÓN</b></h3>
               </div>
             </div>
             <div class="row">  
@@ -73,14 +74,22 @@
               </div>
                </div>
             </div>
+            <div class="row">  
+              <div class="form-group ml-3" style="width: 96.5%">
+                <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fa fa-cut"></i></span>
+                  </div>
+                  <input class="form-control" type="text" name="newDiscount" placeholder="Codigo de descuento (opcional)">
+                </div>
+              </div>
+            </div>
         </div>
         <div class="card-footer">
           <div class="row w-100">
-            <div class="form-group text-center" style="width: 100%">
               <div class="input-group justify-content-center">
                 <button type="submit" class="btn btn-success" name="newPayment">Proceder al pago</button>
               </div>
-            </div>
           </div>
         </div>
         <!-- /.card-body -->

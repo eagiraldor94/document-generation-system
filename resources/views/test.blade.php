@@ -81,7 +81,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    Laravel
+                    Se ha llegado exitosamente al documento de prueba!
                 </div>
                 <p>{{var_dump($code)}}</p>
                 <div class="links">

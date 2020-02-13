@@ -14,7 +14,7 @@ class ResolutionsTableSeeder extends Seeder
        DB::table('resolutions')->insert([
             'prefix' => '',
             'res_number' => '18763001110976',
-            'res_expedition' => '2019-10-15',
+            'res_expedition' => '2019-10-17',
             'start_number' => '1001',
             'end_number' => '2000',
             'start_date' => '2019-10-17',

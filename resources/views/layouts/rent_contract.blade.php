@@ -3,14 +3,14 @@
 	Contrato de arrendamiento de establecimiento de comercio y/o local comercial
 @stop
 @section('css')
-  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="/Views/plugins/datepicker/datepicker3.css">
 @stop
 @section('content')
 <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
       <!-- Content Header (Page header) -->
       <section class="content-header">
-        <div class="container-fluid">
+        <div class="container">
           <div class="row mb-2">
             <div class="col-sm-6">
               <h1 class="m-0 text-dark"> Contrato de arrendamiento <small>local comercial</small></h1>
@@ -25,8 +25,9 @@
         </div><!-- /.container-fluid -->
       </section>
       <section class="content">
+        <div class="container">
 <!-- Default box -->
-      <div class="card mb-5 pb-5 text-center">
+      <div class="card mb-5 text-center">
         <form role="form" method="post" action="carrendamiento" enctype="multipart/form-data">
           @csrf
         <div class="card-header bg-primary d-flex justify-content-center">
@@ -335,11 +336,9 @@
         </div>
         <div class="card-footer">
           <div class="row w-100">
-            <div class="form-group text-center" style="width: 100%">
               <div class="input-group justify-content-center">
                 <button type="submit" class="btn btn-success" name="newDocument">Descargar contrato</button>
               </div>
-            </div>
           </div>
         </div>
         <!-- /.card-body -->
@@ -347,14 +346,15 @@
         </form>
       </div>
       <!-- /.card -->
-
+    </div>
     </section>
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
 @stop
 @section('js')
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="/Views/plugins/datepicker/bootstrap-datepicker.js"></script>
   <script src="/Views/js/datepicker.js"></script>
+  <script src="/Views/plugins/datepicker/locales/bootstrap-datepicker.es.js"></script>
   <script src="/Views/js/servicios.js"></script>
 @stop

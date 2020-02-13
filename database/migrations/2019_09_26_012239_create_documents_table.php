@@ -23,6 +23,7 @@ class CreateDocumentsTable extends Migration
             $table->integer('support_state')->default(0);
             $table->string('email')->nullable();
             $table->string('ip')->nullable();
+            $table->string('disc_code')->nullable();
             $table->string('link')->nullable();
             $table->string('city')->nullable();
             $table->string('country')->nullable();

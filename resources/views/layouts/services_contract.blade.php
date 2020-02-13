@@ -3,14 +3,14 @@
 	Contrato de prestación de servicios profesionales
 @stop
 @section('css')
-  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="/Views/plugins/datepicker/datepicker3.css">
 @stop
 @section('content')
 <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
       <!-- Content Header (Page header) -->
       <section class="content-header">
-        <div class="container-fluid">
+        <div class="container">
           <div class="row mb-2">
             <div class="col-sm-6">
               <h1 class="m-0 text-dark"> Contrato de prestación <small>de servicios profesionales</small></h1>
@@ -25,8 +25,9 @@
         </div><!-- /.container-fluid -->
       </section>
       <section class="content">
+        <div class="container">
 <!-- Default box -->
-      <div class="card mb-5 pb-5 text-center">
+      <div class="card mb-5 text-center">
         <form role="form" method="post" action="cservicios" enctype="multipart/form-data">
           @csrf
         <div class="card-header bg-primary d-flex justify-content-center">
@@ -256,7 +257,15 @@
                </div>
              </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group ml-3" style="width: 47.5%">
+                <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-user-cog"></i></span>
+                  </div>
+                  <input class="form-control" type="text" name="newSecondProfesion" placeholder="Profesion del prestador" required>
+                </div>
+              </div>
+              <div class="form-group ml-3" style="width: 47.5%">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fa fa-user"></i></span>
@@ -377,7 +386,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-dollar-sign"></i></span>
                 </div>
-                <input class="form-control" type="number" name="newSalary" placeholder="Honorarios" required>
+                <input class="form-control" type="number" name="newSalary" placeholder="Honorarios totales" required>
               </div>
                </div>
             </div>
@@ -387,15 +396,22 @@
                   <div class="input-group-prepend d-md-inline-flex">
                   <span class="input-group-text"><i class="fas fa-handshake"></i></span>
                   </div>
-                  <select title="tipo de pago de los honorarios" name="newSalaryPayment" class="form-control" required>
+                  <select id="periodo-pago" title="tipo de pago de los honorarios" name="newSalaryPayment" class="form-control" required>
                     <option value="">Forma de pago</option>
                     <option value="100a">100% anticipado</option>
                     <option value="50-50">50%-50%</option>
                     <option value="100b">100% al terminar</option>
+                    <option value="periodico">Cada determinado tiempo</option>
                   </select>
                 </div>
              </div>
             </div>
+            <div id="cuotas">
+            </div>
+             <div id="info-cuotas">
+             </div>
+             <div id="fechas-pago" class="row mx-auto">
+             </div>
             <div class="row">
               <div class="form-group ml-3" style="width:96.5%">
                 <div class="input-group mb-3">
@@ -420,7 +436,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fas fa-shield-alt"></i></span>
                 </div>
-                <textarea class="form-control" name="newFaculties" placeholder="Facultades otorgadas al contratista para ejercer su labor" rows="3"></textarea>
+                <textarea class="form-control" name="newFaculties" placeholder="Facultades otorgadas al contratista para ejercer su labor" rows="3" required></textarea>
               </div>
                </div>
             </div>
@@ -439,11 +455,9 @@
         </div>
         <div class="card-footer">
           <div class="row w-100">
-            <div class="form-group text-center" style="width: 100%">
               <div class="input-group justify-content-center">
                 <button type="submit" class="btn btn-success" name="newDocument">Descargar contrato</button>
               </div>
-            </div>
           </div>
         </div>
         <!-- /.card-body -->
@@ -451,14 +465,15 @@
         </form>
       </div>
       <!-- /.card -->
-
+    </div>
     </section>
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
 @stop
 @section('js')
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="/Views/plugins/datepicker/bootstrap-datepicker.js"></script>
   <script src="/Views/js/datepicker.js"></script>
+  <script src="/Views/plugins/datepicker/locales/bootstrap-datepicker.es.js"></script>
   <script src="/Views/js/servicios.js"></script>
 @stop
