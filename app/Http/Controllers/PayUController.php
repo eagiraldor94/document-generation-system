@@ -105,11 +105,9 @@ class PayUController extends Controller
 						    		$tax = $product->value*(1-($discount->amount/100))*0.19/1.19; 
 						    		$tax= round($tax, 0, PHP_ROUND_HALF_DOWN);
 	    						}else{
-						    		$base = $product->value/1.19;
-						    		$base = $base-$discount->amount;
+						    		$base = ($product->value-$discount->amount)/1.19;
 						    		$base= round($base, 0, PHP_ROUND_HALF_UP);
-						    		$tax = $product->value*0.19/1.19; 
-						    		$tax = $tax-$discount->amount;
+						    		$tax = ($product->value-$discount->amount)/1.19*0.19;
 						    		$tax= round($tax, 0, PHP_ROUND_HALF_DOWN);
 	    						}
 	    					}
@@ -143,6 +141,8 @@ class PayUController extends Controller
 		    		return view('layouts.payu_send',['post'=>$_POST,'base'=>$base,'tax'=>$tax,'refCode'=>$refCode,'merchant'=>$merchant,'account'=>$account,'docName'=>$docName,'amount'=>$amount,'hash'=>$hash,'sign'=>$sign]); 
     				
     			}else{
+    			    $document->payment_state = 1;
+    			    $document->save();
            			return view($document->product->view,['code'=>$document->hash]);
     			}
     		}
@@ -179,7 +179,7 @@ class PayUController extends Controller
 			if ($_REQUEST['state_pol'] == 4 ) {
 				$document = ludcis\Document::where('hash',$extra1)->first();
 				$estadoTx = "Transacción aprobada";
-				if ($document->payment_state != 1) {
+				if ($document->payment_state =='0') {
 					$document->payment_state =1;
 					$document->save();
 					$payment = new ludcis\Payment();

@@ -19,7 +19,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::resource('confirmations/payu', 'PayUController')->only([
     'store'
 ]);
+Route::resource('confirmations/epayco', 'EpaycoController')->only([
+    'store'
+]);
 Route::resource('disputes/payu', 'ControladorDisputas')->only([
     'store'
 ]);
+Route::post('epayco/retorno', 'EpaycoController@goBack');
 Route::get('consulta/{word}', 'ControladorBusquedas@buscarDocumentos');

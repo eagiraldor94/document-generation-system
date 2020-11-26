@@ -41,7 +41,7 @@
               </div>
             </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fa fa-user"></i></span>
@@ -52,7 +52,7 @@
             </div>
             <!-- Documento -->
             <div class="row">
-              <div class="form-group ml-3" style="width:32%">
+              <div class="form-group col-12 col-sm-4">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-id-card"></i></span>
@@ -64,7 +64,7 @@
                     </select>
                   </div>
                </div>
-               <div class="form-group ml-3" style="width:63%">
+               <div class="form-group col-12 col-sm-8">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
@@ -75,7 +75,7 @@
              </div>
              <div class="row">
             <!-- Residencia -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-home"></i></span>
@@ -84,12 +84,12 @@
                   </div>
                </div>
             <!-- Expedicion -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                     </div>
-                    <input title="Ciudad donde se expidió el documento del deudor" type="text" class="form-control" name="newDebtorExpedition" placeholder="Ciudad de expedición" required>
+                    <input title="Ciudad donde se expidió el documento del deudor" type="text" class="form-control" name="newDebtorExpedition" placeholder="Ciudad de expedición (Opcional)">
                   </div>
                </div>
              </div>
@@ -99,7 +99,7 @@
                   </div>
             </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fa fa-user"></i></span>
@@ -110,7 +110,7 @@
             </div>
             <!-- Documento -->
             <div class="row">
-              <div class="form-group ml-3" style="width:32%">
+              <div class="form-group col-12 col-sm-4">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-id-card"></i></span>
@@ -123,7 +123,7 @@
                     </select>
                   </div>
                </div>
-               <div class="form-group ml-3" style="width:63%">
+               <div class="form-group col-12 col-sm-8">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
@@ -134,12 +134,12 @@
              </div>
              <div class="row">
             <!-- Expedicion -->
-               <div class="form-group ml-3" style="width:96.5%">
+               <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                     </div>
-                    <input title="Ciudad donde se expidió el documento del acreedor" type="text" class="form-control" name="newCreditorExpedition" placeholder="Ciudad de expedición" required>
+                    <input title="Ciudad donde se expidió el documento del acreedor" type="text" class="form-control" name="newCreditorExpedition" placeholder="Ciudad de expedición (Opcional)">
                   </div>
                </div>
              </div>
@@ -149,7 +149,7 @@
                   </div>
             </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fa fa-dollar-sign"></i></span>
@@ -160,7 +160,7 @@
             </div>
              <div class="row">
             <!-- Ciudad -->
-               <div class="form-group ml-3" style="width:96.5%">
+               <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
@@ -170,7 +170,7 @@
                </div>
              </div>
             <div class="row">
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-file-invoice-dollar"></i></span>
@@ -187,7 +187,7 @@
             </div>
             <!-- Documento -->
             <div class="row">
-              <div class="form-group ml-3" style="width:47.5%">
+              <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                   <input title="Interés efectivo mensual" min="0" step=".01" class="form-control" type="number" name="newInterest" placeholder="Interés" required>
                   <div class="input-group-append">
@@ -195,7 +195,7 @@
                   </div>
                 </div>
                </div>
-              <div class="form-group ml-3" style="width:47.5%">
+              <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                       <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
@@ -219,16 +219,16 @@
              </div>
              <div class="row">
             <!-- fecha de pago final -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
                     </div>
-                    <input type="text" class="form-control datepicker" name="newPaymentDate" placeholder="Fecha de pago total" required>
+                    <input type="text" class="form-control datepicker" name="newPaymentDate" placeholder="Fecha de final de cuotas" required>
                   </div>
                </div>
             <!-- Email -->
-              <div class="form-group ml-3" style="width:47.5%">
+              <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-envelope"></i></span>

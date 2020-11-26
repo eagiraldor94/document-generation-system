@@ -9,14 +9,14 @@ $("#notarializado").on("change",function(){
   switch (notarializado) {
   case 'Si':
     $("#datos-notaria").append(
-       '<div class="form-group ml-3" style="width:47.5%">' +
+       '<div class="form-group col-12 col-sm-6">' +
         '<div class="input-group mb-3">' +
             '<div class="input-group-prepend d-md-inline-flex">' +
             '<span class="input-group-text"><i class="fas fa-university"></i></span>' +
             '</div>' +
             '<input title="Notaría en la cual se inscribío (En letras)" type="text" class="form-control" placeholder="Notaría" name="newNotarie" required>' +
        '</div></div>' +
-       '<div class="form-group ml-3" style="width:47.5%">' +
+       '<div class="form-group col-12 col-sm-6">' +
         '<div class="input-group mb-3">' +
             '<div class="input-group-prepend d-md-inline-flex">' +
             '<span class="input-group-text"><i class="far fa-circle"></i></span>' +

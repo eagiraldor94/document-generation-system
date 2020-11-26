@@ -12,6 +12,10 @@ use QrCode;
 
 use Storage;
 
+use Exception;
+
+use Carbon\Carbon;
+
 class ControladorGeneral extends Controller
 {
     public static function obtenerIp(){
@@ -27,29 +31,62 @@ class ControladorGeneral extends Controller
         {
           $ip=$_SERVER['REMOTE_ADDR'];
         }
-        return $ip;
+        $ips = explode(",", $ip); //En el servidor llegan 2 ips por cloudflare
+        return $ips[0];
     }  
 
     protected function generarRegistro($product,$code){
         setlocale(LC_TIME, 'es_ES');
         date_default_timezone_set('America/Bogota');
         $date = date('Y-m-d-h-i-s');
-        $ip = $this->obtenerIp();
+        // Retirada para probar desde localhost
+        // $ip = $this->obtenerIp();
+        $ip = "181.141.228.208";
         $hash = $date.'-'.$code.'-'.$ip;
         $hash = hash('sha256',$hash);
-        // $details = json_decode(file_get_contents("http://ipinfo.io/".$ip));
-        // Retirada para probar desde localhost
-        $details = json_decode(file_get_contents("http://ipinfo.io/181.141.228.208"));
-        $country = $details->country;
-        $city = $details->city;
+        $ch = curl_init("http://ipinfo.io/".$ip);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($ch);
+        //Ocurrio un error?.
+        if(curl_errno($ch)){
+            $ch2 = curl_init("http://api.ipstack.com/".$ip."?access_key=c260a5b912df34f845703139d76170c8");
+            curl_setopt($ch2, CURLOPT_CONNECTTIMEOUT, 15);
+            curl_setopt($ch2, CURLOPT_TIMEOUT, 30);
+            curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+            $response2 = curl_exec($ch2);
+            //Ocurrio un error?.
+            if(curl_errno($ch2)){
+            }else{
+                $details = json_decode($response2);
+                $country = preg_replace_callback('/\\\\u([0-9a-fA-F]{4})/', function ($match) {
+                    return mb_convert_encoding(pack('H*', $match[1]), 'UTF-8', 'UCS-2BE');
+                }, $details->country_code);
+                $city = preg_replace_callback('/\\\\u([0-9a-fA-F]{4})/', function ($match) {
+                    return mb_convert_encoding(pack('H*', $match[1]), 'UTF-8', 'UCS-2BE');
+                }, $details->city);
+            }
+              // throw new Exception(curl_error($ch));
+        }else{
+            $details = json_decode($response);
+            $country = $details->country;
+            $city = $details->city;
+        }
         $documento = new ludcis\Document();
         $documento->product_id = $product->id;
         $documento->hash = $hash;
         $documento->ip = $ip;
+        if (!isset($country)) {
+          header("Location: /error_conexion");
+          exit();
+        }
         $documento->country = $country;
         $documento->city = $city;
-        $documento->save();
-        return $documento;
+        if ($documento->save()) {
+          return $documento;
+        }
+        
     }  
 
     public static function correo($name,$mail,$document,$link,$fecha,$page,$qr,$link2){
@@ -137,9 +174,11 @@ class ControladorGeneral extends Controller
         if ($product->value > 0) {
           return view('layouts.pay_form',['product'=>$product,'document'=>$document]);
         }else{
-          // return view($product->view,['code'=>$document->hash]);
-          $code = base64_encode(QrCode::format('png')->size(600)->errorCorrection('H')->color(27,55,73)->wiFi(['encryption' => 'WPA', 'ssid' => 'NAOMI', 'password' => 'MIGUEL0411', 'hidden' => 'false']));
-          return view('test2',['code'=>$code]);
+          return view($product->view,['code'=>$document->hash]);
+          // $bill = ludcis\Bill::find(1);
+          // $hoy = Carbon::now();
+          // $qr = QrCode::generate('hola');
+          // $envio = ControladorGeneral::correoFactura(ucfirst($bill->name),$bill->email,$bill->pdf,$hoy->format('d/m/Y'),$bill->document->hash,$qr);
         }
   }
     public function vistaPagare(){
@@ -174,6 +213,26 @@ class ControladorGeneral extends Controller
   }
     public function vistaConfidencialidad(){
         $code = 'DCC002';
+        $product = ludcis\Product::where('code',$code)->first();
+        $document = $this->generarRegistro($product,$code);
+        if ($product->value > 0) {
+          return view('layouts.pay_form',['product'=>$product,'document'=>$document]);
+        }else{
+          return view($product->view,['code'=>$document->hash]);
+        }
+  }
+    public function vistaTeletrabajo(){
+        $code = 'DTT014';
+        $product = ludcis\Product::where('code',$code)->first();
+        $document = $this->generarRegistro($product,$code);
+        if ($product->value > 0) {
+          return view('layouts.pay_form',['product'=>$product,'document'=>$document]);
+        }else{
+          return view($product->view,['code'=>$document->hash]);
+        }
+  }
+    public function vistaOtrosiTeletrabajo(){
+        $code = 'OTT015';
         $product = ludcis\Product::where('code',$code)->first();
         $document = $this->generarRegistro($product,$code);
         if ($product->value > 0) {
@@ -286,12 +345,12 @@ class ControladorGeneral extends Controller
 
 
     
-  // public function correoPrueba(){
+  // public static function correoPrueba($post){
   //   $to_name = 'Prueba ludcis';
   //   $to_email = 'ludcis.sas@gmail.com';
-  //   $data = array('name'=>"Documentos", "body" => "Este es un correo de prueba de ludcis");
+  //   $data = array('name'=>"Documentos", "body" => "Este es un correo de prueba de ludcis",'post'=>$post);
         
-  //   Mail::send('correo_prueba', $data, function($message) use ($to_name, $to_email) {
+  //   Mail::send('emails.test', $data, function($message) use ($to_name, $to_email) {
   //       $message->to($to_email, $to_name)
   //               ->subject('Prueba de envio de mail ludcis');
   //       $message->from('documentos@ludcis.com','Servicio de documentos LUDCIS');
@@ -304,12 +363,42 @@ class ControladorGeneral extends Controller
   //       date_default_timezone_set('America/Bogota');
   //       $date = date('Y-m-d-h-i-s');
   //       $hash = $date.'-'.$code.'-'.$ip;
-  //       $hash = password_hash($hash,PASSWORD_DEFAULT);
-        
-  //       echo $code.'<br><br>'.$date.'<br><br>'.$ip.'<br><br>'.$hash.'<br><br>';
+  //       mb_internal_encoding('UTF-8');
+  //       //Initiate cURL
+  //       // $ch = curl_init("http://ipinfo.io/".$ip);
+  //       $ch = curl_init("http://suputamadre.melasura/".$ip);
 
-        // $details = json_decode(file_get_contents("http://ipinfo.io/".$ip));
-  //       var_dump($details); // -> "US"
+  //       //Tell cURL that it should only spend 10 seconds
+  //       //trying to connect to the URL in question.
+  //       curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+
+  //       //A given cURL operation should only take
+  //       //30 seconds max.
+  //       curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+  //       //Tell cURL to return the response output as a string.
+  //       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+  //       //Execute the request.
+  //       $response = curl_exec($ch);
+
+  //       //Did an error occur? If so, dump it out.
+  //       if(curl_errno($ch)){
+  //         $ch2 = curl_init("http://api.ipstack.com/".$ip."?access_key=c260a5b912df34f845703139d76170c8");
+  //         $response2 = curl_exec($ch2);
+  //         $response2 = json_decode($response2);
+  //         var_dump($response2);
+  //         echo"Medell\u00edn <br>";
+  //         $str= "Medell\u00edn";
+  //         $str = preg_replace_callback('/\\\\u([0-9a-fA-F]{4})/', function ($match) {
+  //             return mb_convert_encoding(pack('H*', $match[1]), 'UTF-8', 'UCS-2BE');
+  //         }, $str);
+  //         echo $str;
+  //           // throw new Exception(curl_error($ch));
+  //       }else{
+  //         $response = json_decode($response);
+  //         var_dump($response);
+  //       }
 
   // }
 }

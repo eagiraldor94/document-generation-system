@@ -41,7 +41,7 @@
               </div>
             </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fa fa-user"></i></span>
@@ -51,7 +51,7 @@
               </div>
             </div>
             <div class="row">
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-user-cog"></i></span>
@@ -69,25 +69,25 @@
             </div>
             <!-- Documento -->
             <div class="row">
-              <div class="form-group ml-3" style="width:32%">
+              <div class="form-group col-12 col-sm-4">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-id-card"></i></span>
                     </div>
-                    <select name="newDebtorIdType" class="form-control" required>
-                      <option value="">Tipo de documento</option>
+                    <select name="newDebtorIdType" class="form-control">
+                      <option value="">Tipo de documento (Opcional)</option>
                       <option value="CC">Cedula de ciudadanía</option>
                       <option value="CE">Cedula de extranjería</option>
                       <option value="NIT">NIT</option>
                     </select>
                   </div>
                </div>
-               <div class="form-group ml-3" style="width:63%">
+               <div class="form-group col-12 col-sm-8">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
                     </div>
-                    <input type="text" class="form-control" name="newDebtorId" placeholder="Número del documento" required>
+                    <input type="text" class="form-control" name="newDebtorId" placeholder="Número del documento (Opcional)">
                   </div>
                </div>
              </div>
@@ -97,7 +97,7 @@
               </div>
             </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fa fa-user"></i></span>
@@ -107,7 +107,7 @@
               </div>
             </div>
             <div class="row">
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-user-cog"></i></span>
@@ -125,31 +125,31 @@
             </div>
             <!-- Documento -->
             <div class="row">
-              <div class="form-group ml-3" style="width:32%">
+              <div class="form-group col-12 col-sm-4">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-id-card"></i></span>
                     </div>
-                    <select name="newCreditorIdType" class="form-control" required>
-                      <option value="">Tipo de documento</option>
+                    <select name="newCreditorIdType" class="form-control">
+                      <option value="">Tipo de documento (Opcional)</option>
                       <option value="CC">Cedula de ciudadanía</option>
                       <option value="CE">Cedula de extranjería</option>
                       <option value="NIT">NIT</option>
                     </select>
                   </div>
                </div>
-               <div class="form-group ml-3" style="width:63%">
+               <div class="form-group col-12 col-sm-8">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
                     </div>
-                    <input type="text" class="form-control" name="newCreditorId" placeholder="Número del documento" required>
+                    <input type="text" class="form-control" name="newCreditorId" placeholder="Número del documento (Opcional)">
                   </div>
                </div>
              </div>
              <div class="row">
             <!-- Direccion -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-home"></i></span>
@@ -157,7 +157,7 @@
                     <input title="Dirección del acreedor" type="text" class="form-control" name="newCreditorAddress" placeholder="Dirección de contacto" required>
                   </div>
                </div>
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
@@ -170,7 +170,7 @@
                
              </div>
             <div class="row">
-              <div class="form-group ml-3" style="width:47.5%">
+              <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-phone-square"></i></span>
@@ -179,7 +179,7 @@
               </div>
                </div>
               <!-- Email -->
-                <div class="form-group ml-3" style="width:47.5%">
+                <div class="form-group col-12 col-sm-6">
                   <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fa fa-envelope"></i></span>
@@ -194,30 +194,32 @@
                   </div>
             </div>
             <div class="row">
-               <div class="form-group ml-3" style="width:47.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-cogs"></i></span>
                     </div>
-                    <select name="newContract" class="form-control" required>
-                      <option value="">Tipo de documento</option>
-                      <option value="l contrato">Contrato</option>
-                      <option value=" la obligación">Otra obligación</option>
+                    <select name="newContract" id="tipo-contrato" class="form-control" required>
+                      <option value="">Naturaleza de la obligación</option>
+                      <option value="El contrato">El contrato</option>
+                      <option value="El pagaré">El pagaré</option>
+                      <option value="La letra de cambio">La letra de cambio</option>
+                      <option value="La sentencia">La sentencia</option>
+                      <option value="La factura">La factura</option>
+                      <option value="El canon de arrendamiento">El canon de arrendamiento</option>
+                      <option value="El canon de administración">El canon de administración</option>
+                      <option value="El prestamo personal">El prestamo personal</option>
                     </select>
                   </div>
                </div>
-               <div class="form-group ml-3" style="width:47.5%">
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend d-md-inline-flex">
-                    <span class="input-group-text"><i class="fas fa-pen"></i></span>
-                    </div>
-                    <input title="Descripción de la naturaleza de la obligación" type="text" class="form-control" name="newContractType" placeholder="Razón de deuda" required>
-                  </div>
-               </div>
+
+            </div>
+            <div id="complemento-contrato">
+              
             </div>
              <div class="row">
             <!-- Ciudad -->
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
@@ -228,7 +230,7 @@
             </div>
              <div class="row">
             <!-- Email -->
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-envelope"></i></span>

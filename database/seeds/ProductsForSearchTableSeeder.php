@@ -60,7 +60,7 @@ class ProductsForSearchTableSeeder extends Seeder
             'page' => 'https://ludcis.com/cobro-prejuridico'
         ]);
        DB::table('products_for_search')->insert([
-            'name' => 'contrato de cesion',
+            'name' => 'contrato de cesión',
             'code' => 'DCC009',
             'value' => '19900',
             'page' => 'https://ludcis.com/contrato-cesion'
@@ -88,6 +88,18 @@ class ProductsForSearchTableSeeder extends Seeder
             'code' => 'DCC013',
             'value' => '19900',
             'page' => 'https://ludcis.com/compraventa-vehiculo'
+        ]);
+       DB::table('products_for_search')->insert([
+            'name' => 'contrato de teletrabajo',
+            'code' => 'DTT014',
+            'value' => '4900',
+            'page' => 'https://ludcis.com/teletrabajo'
+        ]);
+       DB::table('products_for_search')->insert([
+            'name' => 'otro sí de teletrabajo',
+            'code' => 'OTT015',
+            'value' => '0',
+            'page' => 'https://ludcis.com/otrosi-teletrabajo'
         ]);
     }
 }

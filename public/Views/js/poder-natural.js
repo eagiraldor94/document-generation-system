@@ -9,7 +9,7 @@ $("#graduado").on("change",function(){
   case 'Si':
     $("#datos-tarjeta").append(
       '<div class="row">' +
-       '<div class="form-group ml-3" style="width:96.5%">' +
+       '<div class="form-group col-12">' +
         '<div class="input-group mb-3">' +
             '<div class="input-group-prepend d-md-inline-flex">' +
             '<span class="input-group-text"><i class="fas fa-hashtag"></i></span>' +
@@ -31,8 +31,8 @@ $("#numero-representados").on("change",function(){
   var cuotas = $(this).val();
   for (var i = 1; i <= cuotas; i++) {
     $("#lista-representados").append(
-            '<div class="row text-center">'+
-             '<div class="form-group ml-3" style="width:80%">'+
+            '<div class="row">'+
+             '<div class="form-group col-12 col-sm-4">'+
                 '<div class="input-group mb-3">'+
                    '<div class="input-group-prepend d-md-inline-flex">'+
                    '<span class="input-group-text"><i class="fas fa-user-clock"></i></span>'+
@@ -46,7 +46,7 @@ $("#numero-representados").on("change",function(){
                     '</select>'+
                   '</div>'+
                '</div>'+
-               '<div class="form-group ml-3" style="width:80%">'+
+               '<div class="form-group col-12 col-sm-8">'+
                 '<div class="input-group mb-3">'+
                     '<div class="input-group-prepend d-md-inline-flex">'+
                     '<span class="input-group-text"><i class="fas fa-user"></i></span>'+

@@ -41,7 +41,7 @@
               </div>
             </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fa fa-user"></i></span>
@@ -51,7 +51,7 @@
               </div>
             </div>
             <div class="row">
-             <div class="form-group ml-3" style="width:32%">
+             <div class="form-group col-12 col-sm-4">
                 <div class="input-group mb-3">
                    <div class="input-group-prepend d-md-inline-flex">
                    <span class="input-group-text"><i class="fas fa-id-card"></i></span>
@@ -64,7 +64,7 @@
                     </select>
                   </div>
                </div>
-               <div class="form-group ml-3" style="width:63%">
+               <div class="form-group col-12 col-sm-8">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
@@ -75,7 +75,7 @@
              </div>
             <!-- Telefono 1 -->
             <div class="row">
-              <div class="form-group ml-3" style="width:47.5%">
+              <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-phone-square"></i></span>
@@ -84,7 +84,7 @@
               </div>
                </div>
             <!-- Email -->
-              <div class="form-group ml-3" style="width:47.5%">
+              <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-envelope"></i></span>
@@ -95,7 +95,7 @@
              </div>
              <div class="row">
             <!-- Direccion -->
-               <div class="form-group ml-3" style="width:96.5%">
+               <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
@@ -106,7 +106,7 @@
              </div>
             <!-- Documento -->
             <div class="row">
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
@@ -128,7 +128,7 @@
               </div>
             </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fa fa-user"></i></span>
@@ -138,7 +138,7 @@
               </div>
             </div>
             <div class="row">
-             <div class="form-group ml-3" style="width:32%">
+             <div class="form-group col-12 col-sm-4">
                 <div class="input-group mb-3">
                    <div class="input-group-prepend d-md-inline-flex">
                    <span class="input-group-text"><i class="fas fa-id-card"></i></span>
@@ -151,7 +151,7 @@
                     </select>
                   </div>
                </div>
-               <div class="form-group ml-3" style="width:63%">
+               <div class="form-group col-12 col-sm-8">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
@@ -162,7 +162,7 @@
              </div>
             <!-- Telefono 1 -->
             <div class="row">
-              <div class="form-group ml-3" style="width:47.5%">
+              <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-phone-square"></i></span>
@@ -172,7 +172,7 @@
               </div>
                </div>
             <!-- Email -->
-              <div class="form-group ml-3" style="width:47.5%">
+              <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-envelope"></i></span>
@@ -184,7 +184,7 @@
              </div>
              <div class="row">
             <!-- Direccion -->
-               <div class="form-group ml-3" style="width:96.5%">
+               <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
@@ -195,7 +195,7 @@
              </div>
             <!-- Documento -->
             <div class="row">
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-id-card"></i></span>
@@ -217,16 +217,16 @@
                   </div>
             </div>
             <div class="row">
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-file-alt"></i></span>
                     </div>
                     <select id="tipo-contrato" title="Tipo de contrato de confidencialidad" name="newContractType" class="form-control" required>
                       <option value="">Tipo de confidencialidad</option>
-                      <option value="Contrato">Por contrato de un cargo (Empresa-persona)</option>
-                      <option value="Sociedad">Por proposicion de sociedad (Persona-persona)</option>
-                      <option value="Convenio">Por convenio (Empresa-empresa)</option>
+                      <option value="Contrato">Empresa-persona</option>
+                      <option value="Sociedad">Persona-persona</option>
+                      <option value="Convenio">Empresa-empresa</option>
                     </select>
                   </div>
                </div>
@@ -235,7 +235,7 @@
             </div>
             <div class="row">
             <!-- Ciudad -->
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-map-marker-alt"></i></span>
@@ -246,7 +246,7 @@
             </div>
             <div class="row">
             <!-- Email -->
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-envelope"></i></span>

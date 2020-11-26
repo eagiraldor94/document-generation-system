@@ -10,7 +10,7 @@ $("#tipo-contrato").on("change",function(){
   case 'Contrato':
     $("#cargo").append(
       '<div class="row">' +
-       '<div class="form-group ml-3" style="width:93%">' +
+       '<div class="form-group col-12">' +
         '<div class="input-group mb-3">' +
             '<div class="input-group-prepend d-md-inline-flex">' +
             '<span class="input-group-text"><i class="fas fa-user-cog"></i></span>' +
@@ -30,7 +30,7 @@ $("#revelador").on("change",function(){
   if (revelador != 'Si mismo') {
     $("#datos-revelador").append(
        '<div class="row">'+
-              '<div class="form-group ml-3" style="width: 96.5%">'+
+              '<div class="form-group col-12">'+
                 '<div class="input-group mb-3">'+
                   '<div class="input-group-prepend d-md-inline-flex">'+
                     '<span class="input-group-text"><i class="fa fa-user"></i></span>'+
@@ -40,7 +40,7 @@ $("#revelador").on("change",function(){
              '</div>'+
             '</div>'+
             '<div class="row">'+
-             '<div class="form-group ml-3" style="width:32%">'+
+             '<div class="form-group col-12 col-sm-4">'+
                 '<div class="input-group mb-3">'+
                    '<div class="input-group-prepend d-md-inline-flex">'+
                    '<span class="input-group-text"><i class="fas fa-id-card"></i></span>'+
@@ -53,7 +53,7 @@ $("#revelador").on("change",function(){
                     '</select>'+
                   '</div>'+
                '</div>'+
-               '<div class="form-group ml-3" style="width:63%">'+
+               '<div class="form-group col-12 col-sm-8">'+
                 '<div class="input-group mb-3">'+
                     '<div class="input-group-prepend d-md-inline-flex">'+
                     '<span class="input-group-text"><i class="fas fa-hashtag"></i></span>'+
@@ -71,7 +71,7 @@ $("#receptor").on("change",function(){
   if (receptor != 'Si mismo') {
     $("#datos-receptor").append(
        '<div class="row">'+
-              '<div class="form-group ml-3" style="width: 96.5%">'+
+              '<div class="form-group col-12">'+
                 '<div class="input-group mb-3">'+
                   '<div class="input-group-prepend d-md-inline-flex">'+
                     '<span class="input-group-text"><i class="fa fa-user"></i></span>'+
@@ -81,7 +81,7 @@ $("#receptor").on("change",function(){
              '</div>'+
             '</div>'+
             '<div class="row">'+
-             '<div class="form-group ml-3" style="width:32%">'+
+             '<div class="form-group col-12 col-sm-4">'+
                 '<div class="input-group mb-3">'+
                    '<div class="input-group-prepend d-md-inline-flex">'+
                    '<span class="input-group-text"><i class="fas fa-id-card"></i></span>'+
@@ -94,7 +94,7 @@ $("#receptor").on("change",function(){
                     '</select>'+
                   '</div>'+
                '</div>'+
-               '<div class="form-group ml-3" style="width:63%">'+
+               '<div class="form-group col-12 col-sm-8">'+
                 '<div class="input-group mb-3">'+
                     '<div class="input-group-prepend d-md-inline-flex">'+
                     '<span class="input-group-text"><i class="fas fa-hashtag"></i></span>'+

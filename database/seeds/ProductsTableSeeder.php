@@ -75,7 +75,7 @@ class ProductsTableSeeder extends Seeder
             'pdf' => 'Views/documents/Manuals/COBRO_PRE_JURIDICO.pdf'
         ]);
        DB::table('products')->insert([
-            'name' => 'contrato de cesion',
+            'name' => 'contrato de cesión',
             'code' => 'DCC009',
             'view' => 'layouts.contract_transfer',
             'value' => '19900',
@@ -113,6 +113,22 @@ class ProductsTableSeeder extends Seeder
             'value' => '19900',
             'page' => 'https://ludcis.com/compraventa-vehiculo',
             'pdf' => 'Views/documents/Manuals/COMPRAVENTA.pdf'
+        ]);
+       DB::table('products')->insert([
+            'name' => 'contrato de teletrabajo',
+            'code' => 'DTT014',
+            'view' => 'layouts.remote_work_contract',
+            'value' => '4900',
+            'page' => 'https://ludcis.com/teletrabajo',
+            'pdf' => 'Views/documents/Manuals/TRABAJO.pdf'
+        ]);
+       DB::table('products')->insert([
+            'name' => 'otro sí de teletrabajo',
+            'code' => 'OTT015',
+            'view' => 'layouts.remote_work_modification',
+            'value' => '0',
+            'page' => 'https://ludcis.com/otrosi-teletrabajo',
+            'pdf' => 'Views/documents/Manuals/TRABAJO.pdf'
         ]);
        DB::table('products')->insert([
             'name' => 'prueba',

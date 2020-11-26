@@ -24,23 +24,86 @@ class ControladorDocumentos extends Controller
         if ($document->product->value > 0 && $document->payment_state == 0) {
           return redirect('/');        
         }
-        if ($document->document_state == 1) {
-          return redirect('/');        
-        }
+        // if ($document->document_state == 1) {
+        //   return redirect('/');        
+        // }
         $datos = $_POST;
         $document->email = $datos['newEmail'];
         setlocale(LC_TIME, 'es_ES');
     		date_default_timezone_set('America/Bogota');
         $valorLetras = ludcis\NumeroALetras::convertir($datos['newAmount'], 'pesos colombianos', 'centavos');
-        $valorLetras .=' (COP).';
         $hoy = Carbon::now();
         $mes = $this->mesLetras($hoy);
-        $fechaFin = Carbon::parse($datos['newPaymentDate']);
-        $meses = floor($hoy->diffInMonths($fechaFin));
-        $interes = $datos['newAmount']*$meses*$datos['newInterest']/100;
-        $total = $interes + $datos['newAmount'];
-        $valorLetrasTotal = ludcis\NumeroALetras::convertir($total, 'pesos colombianos', 'centavos');
-        $valorLetrasTotal .=' (COP).';
+        $fechaFin = Carbon::createFromFormat('d/m/Y',$datos['newPaymentDate']);
+        // $meses = floor($hoy->diffInMonths($fechaFin));
+        // $interes = $datos['newAmount']*$meses*$datos['newInterest']/100;
+        // $total = $interes + $datos['newAmount'];
+        // $valorLetrasTotal = ludcis\NumeroALetras::convertir($total, 'pesos colombianos', 'centavos');
+        // $valorLetrasTotal .=' (COP).';
+        switch ($datos['newFeesType']) {
+          case "Semanal":
+            $fecha = $hoy->copy()->addWeek();
+            $i = 1;
+            while ($fecha <= $fechaFin) {
+                $datos['newFeesNumber']=$i;
+                $key = 'newPaymentDate'.$i;
+                $datos[$key]=$fecha->copy()->format('d/m/Y');
+                $i++;
+                $fecha->addWeek();
+            }
+            break;
+          case "Mensual":
+            $fecha = $hoy->copy()->addMonth();
+            $i = 1;
+            while ($fecha <= $fechaFin) {
+                $datos['newFeesNumber']=$i;
+                $key = 'newPaymentDate'.$i;
+                $datos[$key]=$fecha->copy()->format('d/m/Y');
+                $i++;
+                $fecha->addMonth();
+            }
+            break;
+          case "Cada 2 semanas":
+            $fecha = $hoy->copy()->addWeeks(2);
+            $i = 1;
+            while ($fecha <= $fechaFin) {
+                $datos['newFeesNumber']=$i;
+                $key = 'newPaymentDate'.$i;
+                $datos[$key]=$fecha->copy()->format('d/m/Y');
+                $i++;
+                $fecha->addWeeks(2);
+            }
+            break;
+          case "Cada 15 días":
+            $fecha = $hoy->copy()->addDays(15);
+            $i = 1;
+            while ($fecha <= $fechaFin) {
+                $datos['newFeesNumber']=$i;
+                $key = 'newPaymentDate'.$i;
+                $datos[$key]=$fecha->copy()->format('d/m/Y');
+                $i++;
+                $fecha->addDays(15);
+            }
+            break;
+          case "Cada 30 días":
+            $fecha = $hoy->copy()->addDays(30);
+            $i = 1;
+            while ($fecha <= $fechaFin) {
+                $datos['newFeesNumber']=$i;
+                $key = 'newPaymentDate'.$i;
+                $datos[$key]=$fecha->copy()->format('d/m/Y');
+                $i++;
+                $fecha->addDays(30);
+            }
+            break;
+          
+          default:
+            // code...
+            break;
+        }
+        if (!isset($datos['newFeesMix'])) {
+            $datos['newFeesMix']='intereses';
+        }
     	$qr = QrCode::format('png')->size(400)->errorCorrection('H')->color(60,60,59)->generate($document->product->page);
       $html='<html>
 <head>
@@ -73,13 +136,13 @@ background-color: #666666;
   padding: 15px;
 }
 .font-size{
-  font-size:25px;
+  font-size:20px;
 }
 .font-size-2{
-  font-size:18px;
+  font-size:16px;
 }
 .font-size-3{
-  font-size:16px;
+  font-size:18px;
 }
 .w-100{
   width:100%;
@@ -88,17 +151,17 @@ background-color: #666666;
   padding-left:5%
 }
 .m1{
-    margin-bottom: 60px;
-    margin-top: 25px;
+    margin-bottom: 20px;
+    margin-top: 35px;
 }
 .m2{
     margin-bottom: 15px;
 }
 .m3{
-    margin-top: 20px;
+    margin-top: 45px;
 }
 .m4{
-    margin-bottom: 60px;
+    margin-bottom: 20px;
 }
 *.col-1 {width: 8.33%;}
 *.col-2 {width: 16.66%;}
@@ -114,43 +177,100 @@ background-color: #666666;
 *.col-12 {width: 100%;}
 </style>
 </head>
-<body><div class="row m1" style="text-align:center;">
+<body>
+
+<div class="row m1" style="text-align:center;">
+  <span class="font-size"><b>CARTA DE INSTRUCCIONES</b></span>
+</div>
+<div class="row m4" style="text-align:left;">
+  <span class="font-size2">Señor(a):<br><b>'.mb_strtoupper($datos['newCreditor']).'</b><br>Ciudad '.ucfirst($datos['newCreditCity']).'</span>
+</div>
+<div class="row m4" style="text-align:left;">
+  <span class="font-size3">REFERENCIA: <b>AUTORIZACIÓN EXPRESA PARA EL LLENO DE LOS ESPACIOS EN BLANCO DEL PAGARÉ No. '.$document->id.'</b></span>
+</div><div class="row m2" style="text-align:justify;">
+  <span class="font-size2">Yo, <b>'.mb_strtoupper($datos['newDebtor']).'</b>, mayor de edad y residente de la ciudad de '.ucfirst($datos['newDebtorCity']).', identificado (a) con <b>'.$datos['newDebtorIdType'].'</b> No. <b>'.$datos['newDebtorId'].'</b>';
+  if (isset($datos['newDebtorExpedition']) && $datos['newDebtorExpedition'] != '' && $datos['newDebtorExpedition'] != null) {
+    $html.=' expedida en el municipio de <b>'.mb_strtoupper($datos['newDebtorExpedition']).'</b>';
+  }
+  $html.=', actuando en nombre propio, por medio del presente escrito manifiesto que le faculto a usted, de manera permanente e irrevocable, para que, en caso de incumplimiento del compromiso de pago oportuno de alguna de las obligaciones que he adquirido con usted, mismas derivadas de los negocios ya sea comerciales y contractuales, bien o a bien se hayan dado de manera verbal o escrita; sin previo aviso, proceda a llenar los espacios en blanco del pagaré No. '.$document->id.', que he suscrito en la fecha '.$hoy->format('d').' de '.$mes.' del año '.$hoy->format('Y').' a su favor y que se anexa, esto con el fin, de convertir el pagare, en un documento que presta merito ejecutivo y que está sujeto a los parámetros legales da la luz del Artículo 622 del Código de Comercio.</span>
+</div>
+<div class="row m2" style="text-align:justify;"><span class="font-size2">
+    <ol>
+      <li>El espacio correspondiente a “la suma cierta de” se rellenará por una suma igual a la que resulte pendiente de pago de todas las obligaciones contraídas con el acreedor, por concepto de capital, intereses, seguros, cobranza extrajudicial, según la contabilidad del acreedor a la fecha en que sea llenado el pagare.</li>
+      <li>El espacio correspondiente a “la fecha” en que se debe hacer el pago, se llenara con la fecha correspondiente al día en que sea llenado el pagaré, fecha que se entiende que es la de su vencimiento.</li>
+      </ol>
+  </span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">En constancia y a raíz de lo anterior, se firma la autorización expresa para el lleno de los espacios en blanco del pagare <b>No. '.$document->id.'</b> a los '.$hoy->format('d').' días del mes de '.$mes.' del año '.$hoy->format('Y').'.</span>
+</div>
+<div class="m3">
+  <table>
+    <tr>
+      <td>
+      <div class="row">
+        <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
+        <span class="font-size2 m4"><b>EL DEUDOR,</b></span><br>
+        <span class="font-size3"><b>'.mb_strtoupper($datos['newDebtor']).'</b><br>
+        <b>'.$datos['newDebtorIdType'].'</b> No.<b>'.$datos['newDebtorId'].'</b>';
+        if (isset($datos['newDebtorExpedition']) && $datos['newDebtorExpedition'] != '' && $datos['newDebtorExpedition'] != null) {
+           $html.=' de <b>'.mb_strtoupper($datos['newDebtorExpedition']).'</b>';
+         } 
+         $html.='</span>
+      </td>
+    </tr>
+  </table>
+</div>
+<pagebreak>
+
+<div class="row m1" style="text-align:center;">
 	<span class="font-size"><b>PAGARÉ</b></span>
 </div>
-<div class="row m2" style="text-align:justify;">
-	<span class="font-size2">Yo, <b>'.mb_strtoupper($datos['newDebtor']).'</b>, mayor de edad y residente de la ciudad de '.$datos['newDebtorCity'].', identificado (a) con <b>'.$datos['newDebtorIdType'].'</b> No. <b>'.$datos['newDebtorId'].'<br> expedida en el municipio de <b>'.mb_strtoupper($datos['newDebtorExpedition']).'</b>, actuando en nombre propio, por medio del presente escrito manifiesto, lo siguiente: </span>
+<div class="row m4" style="text-align:right;">
+  <span class="font-size3"><b>PAGARÉ No. '.$document->id.'</b></span>
 </div>
 <div class="row m2" style="text-align:justify;">
-	<span class="font-size2"><b><u>PRIMERO:</u></b> Que debo y pagare, de manera incondicional y solidariamente, a la orden de (el) (la) señor (a) <b>'.mb_strtoupper($datos['newCreditor']).'</b>, identificado (a) con '.$datos['newCreditorIdType'].' No. <b>'.$datos['newCreditorId'].'</b> expedida en el municipio de <b>'.mb_strtoupper($datos['newCreditorExpedition']).'</b>, o en su defecto, a la persona ya sea natural o jurídica, a quien el (la) mencionado (a) acreedor (a) (el (la) señor (a) <b>'.mb_strtoupper($datos['newCreditor']).'</b>), ceda o endose sus derechos sobre este pagaré, la suma real y cierta de: <u>$ '.number_format($total,2).' ('.$valorLetrasTotal.') </u> <b>M/L</b>. mismos que derivan de préstamo a título personal, con fines de libre inversión. En dicho importe, se encuentran sumados los intereses del préstamo, en favor del (la) señor (a) <b>'.mb_strtoupper($datos['newCreditor']).'</b>.</span>
+	<span class="font-size2">Yo, <b>'.mb_strtoupper($datos['newDebtor']).'</b>, mayor de edad y residente de la ciudad de '.ucfirst($datos['newDebtorCity']).', identificado (a) con <b>'.$datos['newDebtorIdType'].'</b> No. <b>'.$datos['newDebtorId'].'</b>';
+  if (isset($datos['newDebtorExpedition']) && $datos['newDebtorExpedition'] != '' && $datos['newDebtorExpedition'] != null) {
+     $html.=' expedida en el municipio de <b>'.mb_strtoupper($datos['newDebtorExpedition']).'</b>';
+   } 
+   $html.=', actuando en nombre propio, por medio del presente escrito manifiesto, lo siguiente: </span>
 </div>
 <div class="row m2" style="text-align:justify;">
-	<span class="font-size2"><b><u>SEGUNDO:</u></b> Que el pago total de la citada obligación se efectuara en';
-    	if ($datos['newFeesNumber']>1) {
+	<span class="font-size2"><b><u>PRIMERO:</u></b> Que debo y pagare, de manera incondicional y solidariamente, a la orden de (el) (la) señor (a) <b>'.mb_strtoupper($datos['newCreditor']).'</b>, identificado (a) con '.$datos['newCreditorIdType'].' No. <b>'.$datos['newCreditorId'].'</b>';
+  if (isset($datos['newCreditorExpedition']) && $datos['newCreditorExpedition'] != '' && $datos['newCreditorExpedition'] != null) {
+     $html.=' expedida en el municipio de <b>'.mb_strtoupper($datos['newCreditorExpedition']).'</b>';
+   } 
+   $html.=', o en su defecto, a la persona ya sea natural o jurídica, a quien (el) (la) mencionado (a) acreedor (a) (el (la) señor (a) <b>'.mb_strtoupper($datos['newCreditor']).'</b>), ceda o endose sus derechos sobre este pagaré, la suma real y cierta de: <span style="font-family:sans-serif">$____________________________</span> <b>M/L</b>. mismos que derivan de préstamo a título personal de $ '.number_format($datos['newAmount'],2).' COP ('.$valorLetras.'), con fines de libre inversión. En dicho importe, se encuentran sumados los intereses del préstamo, en favor del (la) señor (a) <b>'.mb_strtoupper($datos['newCreditor']).'</b>.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+	<span class="font-size2"><b><u>SEGUNDO:</u></b> Que el pago total de la citada obligación se efectuara en ';
+    	if (isset($datos['newFeesNumber']) && $datos['newFeesNumber']>1) {
     		$html .='un total de '.$datos['newFeesNumber'].' cuotas de la siguiente manera: </span>';
     	}else{
-    		$html .='sola cuota o contado de la siguiente manera: </span><br>';
+    		$html .='una sola cuota o contado de la siguiente manera: </span><br>';
     	}
 $html .= '
 	<span class="font-size2">
 		<ul>
 			<li>';
-    	if ($datos['newFeesNumber']>1) {
-    		$html .='El '.substr($fechaFin,0,10).', habré pagado en favor del acreedor o a quién este último, ceda o endose sus derechos sobre este pagaré, la suma cierta de: <u>$ '.number_format($total,2).' ('.$valorLetrasTotal.')</u> mismos que derivan del préstamo para libre inversión, en la ciudad de <b>'.mb_strtoupper($datos['newCreditCity']).'</b>, ';
+    	if (isset($datos['newFeesNumber']) && $datos['newFeesNumber']>1) {
+    		$html .='El '.substr($fechaFin,0,10).', habré pagado en favor del acreedor o a quién este último, ceda o endose sus derechos sobre este pagaré, la suma cierta de: <span style="font-family:sans-serif">$____________________________</span> mismos que derivan del préstamo para libre inversión, en la ciudad de <b>'.ucfirst($datos['newCreditCity']).'</b>, ';
     		if($datos['newPaymentType']=='Deposito'){
-    			$html .='en la '.$datos['newPaymentAccount'].' <b>No.</b>'.$datos['newPaymentNumber'].' del banco'.$datos['newPaymentBank'].'en favor y a nombre del suscrito acreedor.';
+    			$html .='en la '.$datos['newPaymentAccount'].' <b>No.</b> '.$datos['newPaymentNumber'].' del banco '.$datos['newPaymentBank'].'en favor y a nombre del suscrito acreedor.';
     		}else{
     			$html .='en efectivo a favor del suscrito acreedor';
     		}
     	}else{
-    		$html .='El '.substr($fechaFin,0,10).', pagaré en favor del acreedor o a quién este último, ceda o endose sus derechos sobre este pagaré, la suma cierta de: <u>$ '.number_format($total,2).' ('.$valorLetrasTotal.')</u> mismos que derivan del préstamo para libre inversión, en la ciudad de <b>'.mb_strtoupper($datos['newCreditCity']).'</b>, ';
+    		$html .='El '.substr($fechaFin,0,10).', pagaré en favor del acreedor o a quién este último, ceda o endose sus derechos sobre este pagaré, la suma cierta de: <span style="font-family:sans-serif">$____________________________</span> mismos que derivan del préstamo para libre inversión, en la ciudad de <b>'.ucfirst($datos['newCreditCity']).'</b>, ';
     		if($datos['newPaymentType']=='Deposito'){
-    			$html .='en la '.$datos['newPaymentAccount'].' <b>No.</b>'.$datos['newPaymentNumber'].' del banco'.$datos['newPaymentBank'].'en favor y a nombre del suscrito acreedor.';
+    			$html .='en la '.$datos['newPaymentAccount'].' <b>No.</b> '.$datos['newPaymentNumber'].' del banco '.$datos['newPaymentBank'].'en favor y a nombre del suscrito acreedor.';
     		}else{
     			$html .='en efectivo a favor del suscrito acreedor';
     		}
     	}
 $html .= '</li>';
-    	if ($datos['newFeesNumber']>1) {
+    	if (isset($datos['newFeesNumber']) && $datos['newFeesNumber']>1) {
 	    	for ($i = 1; $i <= $datos['newFeesNumber'] ; $i++) {
 	    		$key = 'newPaymentDate'.$i;
 	    		$html .= '<li>
@@ -158,9 +278,9 @@ $html .= '</li>';
 	    		</li>';
 	    	}
     	}
-    	$html .= '<li>Los abonos correspondientes a los intereses serán causados mensualmente, estos, se harán por un valor del '.$datos['newInterest'].' de interés efectivo mensual, sobre el valor del prestamo y deberán ';
+    	$html .= '<li>Los abonos correspondientes a '.$datos['newFeesMix'].' serán causados mensualmente, estos, se tendrán un valor del '.$datos['newInterest'].'% de interés efectivo mensual, sobre el saldo de la deuda y deberán ';
 		if($datos['newPaymentType']=='Deposito'){
-			$html .='consignarse en la '.$datos['newPaymentAccount'].' <b>No.</b>'.$datos['newPaymentNumber'].' del banco'.$datos['newPaymentBank'].'en favor y a nombre del suscrito acreedor, ';
+			$html .='consignarse en la '.$datos['newPaymentAccount'].' <b>No.</b> '.$datos['newPaymentNumber'].' del banco '.$datos['newPaymentBank'].'en favor y a nombre del suscrito acreedor, ';
 		}else{
 			$html .='pagarse en efectivo a favor del suscrito acreedor, ';
 		}
@@ -169,10 +289,14 @@ $html .= '</ul>
 	</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-	<span class="font-size2"><b><u>TERCERO:</u></b> La fecha de pago de este título valor será el dia: <u>'.$datos['newPaymentDate'].'</u>.</span>
+	<span class="font-size2"><b><u>TERCERO:</u></b> La fecha de pago de este título valor será el dia: <span style="font-family:sans-serif">______</span> de <span style="font-family:sans-serif">_____________</span> del año <span style="font-family:sans-serif">______</span>.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-	<span class="font-size2"><b><u>CUARTO:</u></b> Que, en caso de mora, yo, pagaré a el (la) señor (a) <b>'.mb_strtoupper($datos['newCreditor']).'</b>, identificada con '.$datos['newCreditorIdType'].' No. <b>'.$datos['newCreditorId'].'</b> expedida en la ciudad de <b>'.mb_strtoupper($datos['newCreditorExpedition']).'</b>, o a la persona natural o jurídica, a quien el (la) mencionado (a) acreedor (a) ceda o endose sus derechos sobre este pagaré; intereses de mora, a la más alta tasa permitida por la Ley, desde el día siguiente a la fecha de exigibilidad del presente pagaré, y hasta cuando su pago total se efectúe.</span>
+	<span class="font-size2"><b><u>CUARTO:</u></b> Que, en caso de mora, yo, pagaré a el (la) señor (a) <b>'.mb_strtoupper($datos['newCreditor']).'</b>, identificada con '.$datos['newCreditorIdType'].' No. <b>'.$datos['newCreditorId'].'</b>';
+  if (isset($datos['newCreditorExpedition']) && $datos['newCreditorExpedition'] != '' && $datos['newCreditorExpedition'] != null) {
+     $html.=' expedida en el municipio de <b>'.mb_strtoupper($datos['newCreditorExpedition']).'</b>';
+   } 
+   $html.=', o a la persona natural o jurídica, a quien el (la) mencionado (a) acreedor (a) ceda o endose sus derechos sobre este pagaré; intereses de mora, a la más alta tasa permitida por la Ley, desde el día siguiente a la fecha de exigibilidad del presente pagaré, y hasta cuando su pago total se efectúe.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
 	<span class="font-size2"><b><u>QUINTO:</u></b> Expresa, precisa y claramente, declaro excusado, el protesto del presente pagaré; además, de todos y cada uno de los requerimientos judiciales o extrajudiciales para la constitución en mora.</span>
@@ -184,7 +308,7 @@ $html .= '</ul>
   <span class="font-size2"><b><u>SÉPTIMO:</u></b> A partir de la presente clausula, solo será válido el parágrafo que advierte del número de copias o ejemplares, la fecha y/o lugar en que se desarrolla el documento y las correspondientes firmas de las partes, puesto que, todo espacio que aparezca en blanco en el actual documento no puede ser rellenado con ninguna otra clausula o condición, que afecte u obligue a cualquiera de las partes.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-	<span class="font-size2">En constancia y por consecuencia de lo anterior, se firma y suscribe este título valor, en la ciudad de <b>'.mb_strtoupper($datos['newCreditCity']).'</b>, a los '.$hoy->format('d').' días del mes de '.$mes.' del año '.$hoy->format('Y').'.</span>
+	<span class="font-size2">En constancia y por consecuencia de lo anterior, se firma y suscribe este título valor, en la ciudad de <b>'.ucfirst($datos['newCreditCity']).'</b>, a los '.$hoy->format('d').' días del mes de '.$mes.' del año '.$hoy->format('Y').'.</span>
 </div></body>
 </html>';
 $footer='<table>
@@ -194,7 +318,11 @@ $footer='<table>
       <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
       <span class="font-size2 m4"><b>EL DEUDOR,</b></span><br>
       <span class="font-size3"><b>'.mb_strtoupper($datos['newDebtor']).'</b><br>
-      <b>'.$datos['newDebtorIdType'].'</b> No.<b>'.$datos['newDebtorId'].'</b> de <b>'.mb_strtoupper($datos['newDebtorExpedition']).'</b></span>
+      <b>'.$datos['newDebtorIdType'].'</b> No.<b>'.$datos['newDebtorId'].'</b>';
+      if (isset($datos['newDebtorExpedition']) && $datos['newDebtorExpedition'] != '' && $datos['newDebtorExpedition'] != null) {
+         $footer.=' de <b>'.mb_strtoupper($datos['newDebtorExpedition']).'</b>';
+       }
+       $footer.='</span>
     </td>
   </tr>
 </table>';
@@ -208,6 +336,7 @@ $footer='<table>
         $mpdf->SetProtection(array('print','print-highres'), '', '');
         $mpdf->defaultfooterline = 0;
         $mpdf->WriteHTML($html);
+        $mpdf->AddPage();
         $mpdf->setFooter($footer);
         $codigo = sha1($document->id);
         $document->link = 'Views/documents/'.$document->product->code.'/pagare_'.$codigo.'.pdf';
@@ -229,7 +358,7 @@ $footer='<table>
         if (!is_object($document)) {
           return redirect('/');        
         }
-        if ($document->product->value > 0 && $document->payment_state = 0) {
+        if ($document->product->value > 0 && $document->payment_state == 0) {
           return redirect('/');        
         }
         if ($document->document_state == 1) {
@@ -331,7 +460,11 @@ background-color: #666666;
   <span class="font-size2">Cordial saludo:</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b>'.mb_strtoupper($datos['newPetitioner']).'</b>, identificado (a) con <b>'.$datos['newPetitionerIdType'].'</b> No. <b>'.$datos['newPetitionerId'].'</b> de <b>'.mb_strtoupper($datos['newPetitionerExpedition']).'</b> en ejercicio del derecho de petición consagrado en el artículo 23 de la Constitución Política de Colombia y con el lleno de los requisitos del artículo 5, 15 y 16 del Código de lo Contencioso Administrativo, ley 1437 de 2011 modificado por el artículo 1º de la ley 1755 de 2015, respetuosamente me dirijo a su despacho con el fin de solicitarle: </span>
+  <span class="font-size2"><b>'.mb_strtoupper($datos['newPetitioner']).'</b>, identificado (a) con <b>'.$datos['newPetitionerIdType'].'</b> No. <b>'.$datos['newPetitionerId'].'</b>';
+  if (isset($datos['newPetitionerExpedition']) && $datos['newPetitionerExpedition'] != '' && $datos['newPetitionerExpedition'] != null) {
+     $html.=' de <b>'.mb_strtoupper($datos['newPetitionerExpedition']).'</b>';
+   }
+   $html.=' en ejercicio del derecho de petición consagrado en el artículo 23 de la Constitución Política de Colombia y con el lleno de los requisitos del artículo 5, 15 y 16 del Código de lo Contencioso Administrativo, ley 1437 de 2011 modificado por el artículo 1º de la ley 1755 de 2015, respetuosamente me dirijo a su despacho con el fin de solicitarle: </span>
 </div>
 <div class="row m2" style="text-align:justify;">
   <ol>
@@ -367,6 +500,21 @@ background-color: #666666;
        }
       $html .= ' prueba de que en el sitio había señalización de Detección Electrónica tal como lo ordena el artículo 10 de la ley 1843 de 2017 y el artículo 10 de la resolución 718 de 2018.</span></li>
       <li><span class="font-size2"> Les solicito por favor copia de los permisos solicitados ante la Dirección de Tránsito y Transporte del Ministerio de Transporte para instalar cámaras de FOTODETECCIÓN en dicho(s) sector(es) tal como lo ordenan el artículo 2 de la ley 1843 de 2017 y el artículo 5 de la resolución 718 de 2018.</span></li>
+    <li><span class="font-size2"> Les solicito muy comedidamente, copia de la debida calibración de las cámaras de <b>FOTODETECCIÓN</b> con la cual ';
+       if ($datos['newPenaltyNumber'] > 1) {
+          $html .='se realizaron los comparendos con número: ';
+          for ($i = 1; $i <= $datos['newPenaltyNumber'] ; $i++) {
+            if ($i != '1') {
+             $html .=', ';
+            }
+            $key = 'newPenalty'.$i;
+            $html .= '<b>'.$datos[$key].'</b>';
+          }
+          $html .='.';
+       }elseif ($datos['newPenaltyNumber'] == 1) {
+           $html .='se realizó el comparendo con número: <b>'.$datos['newPenalty1'].'</b>.';
+       }
+      $html .= ', certificado expedido por <b>Instituto Nacional de Metrología INM</b> tal como lo establecen la ley 1843 del año 2017 y la Resolución 718 del año 2018 y lo preceptuado en el capítulo III “Condiciones de operación” de la Resolución 0000718 de marzo del 2018, el su artículo 8º.</span></li>
       <li><span class="font-size2"> Les solicito por favor copia de la resolución sancionatoria ';
        if ($datos['newPenaltyNumber'] > 1) {
           $html .='de los comparendos con número: ';
@@ -424,6 +572,21 @@ background-color: #666666;
            $html .='del comparendo con número: <b>'.$datos['newPenalty1'].'</b>.';
        }
       $html .= ' de acuerdo con lo establecido en el artículo 826 del estatuto tributario.</span></li>
+    <li><span class="font-size2"> Solicito muy comedidamente la exoneración ';
+       if ($datos['newPenaltyNumber'] > 1) {
+          $html .='de los comparendos con número: ';
+          for ($i = 1; $i <= $datos['newPenaltyNumber'] ; $i++) {
+            if ($i != '1') {
+             $html .=', ';
+            }
+            $key = 'newPenalty'.$i;
+            $html .= '<b>'.$datos[$key].'</b>';
+          }
+          $html .='.';
+       }elseif ($datos['newPenaltyNumber'] == 1) {
+           $html .='del comparendo con número: <b>'.$datos['newPenalty1'].'</b>.';
+       }
+      $html .= ', en caso de que no tengan prueba que permita identificar plenamente al infractor de la FOTODETECCIÓN, o en caso contrario dicha evidencia, tal como lo ordena la Sentencia C – 038 de 2020.</span></li>
   </ol>
 </div>
 <div class="row m2" style="text-align:center">
@@ -519,6 +682,18 @@ background-color: #666666;
   <span class="font-size2">El artículo 8 de la ley 1843 de 2017, que modificó el artículo 22 de la ley 1383 de 2010 que a su vez modificaba el artículo 135 del Código Nacional de Tránsito, establece que la notificación debe enviarse a los 3 días hábiles siguientes a través de una empresa de mensajería. Y según el auto aclaratorio 123 de 2016 de la sentencia T-051 de 2016 se establece es que el organismo de tránsito tiene 3 días es para enviar la notificación a la empresa de mensajería. Ya luego la empresa de mensajería a través de un contrato privado de prestación de servicios establece en cuanto tiempo entregará la notificación al destinatario final que en la mayoría de las ciudades es de 5 días hábiles. O sea que en total la notificación no puede enviarse al destinatario final más allá de los 8 días hábiles en promedio (aunque dependiendo de la ciudad el tiempo puede variar un poco). Sin embargo, ese tiempo se tiene que cumplir o si no se genera nulidad de lo actuado.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
+  <span class="font-size2">El Artículo 14º de la misma ley 1843 de 2017 señala que “los laboratorios. que se acrediten para prestar el servicio deberán demostrar la trazabilidad de sus equipos medidores de velocidad conforme a los patrones de referencia nacional, definidos por el Instituto Nacional de Metrología.”</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">También aduce que “El servicio de trazabilidad de los equipos medidores de velocidad, se prestará con sujeción a las tarifas establecidas por dicho instituto,”</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">Deja claro que “Hasta tanto existan laboratorios acreditados en el territorio nacional, la calibración de los equipos, medidores de velocidad, estará a cargo del Instituto Nacional de Metrología.”</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">El capítulo III “Condiciones de operación” de la Resolución 0000718 de marzo del 2018, en su artículo 8º señala que “todos los sistemas o equipos usados para la detección de infracciones de tránsito deberán tener “desde el inicio de su operación” mecanismos de calibración”.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
   <span class="font-size2">La <b>sentencia T – 247 de 1997 dice lo siguiente:</b></span>
 </div>
 <div class="row m2" style="text-align:justify;">
@@ -593,6 +768,27 @@ background-color: #666666;
   <span class="font-size2"><b>Artículo 454. Fraude a resolución judicial.</b> <u>Modificado por el art. 12, Ley 890 de 2004,  Modificado por el art. 47, Ley 1453 de 2011</u>. El que por cualquier medio se sustraiga al <b><u>cumplimiento de obligación</u></b> impuesta en <b><u>resolución judicial</u></b>, incurrirá en <b><u>prisión</u></b> de uno (1) a cuatro (4) años y <b><u>multa</u></b> de cinco (5) a cincuenta (50) salarios mínimos legales mensuales vigentes.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>La sentencia C - 038 de 2020</b> declaró inexequible el parágrafo 1 del artículo 8 de la ley 1843 de 2017 que trataba sobre la solidaridad entre el conductor y el propietario del vehículo por las infracciones captadas con cámaras de <b>FOTODETECCIÓN</b>. Ello implica que automáticamente <b>TODAS</b> las <b>FOTODETECCIONES</b> realizadas desde el 14 de julio de 2017 (fecha en la cual se sanciona la ley 1843 de 2017) hasta la fecha son ilegales y deben ser exoneradas con base en el principio general del derecho <b>ACCESORIUM SEQUITUR PRINCIPALE</b> o también <b>ACCESORIUM NON DUCIT</b>, <b>SED SEQUITUR SUUM PRINCIPALE</b> (lo accesorio sigue la suerte de lo principal).</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">Y para todas aquellas <b>FOTODETECCIONES</b> anteriores al 2017, por analogía y según el artículo 162 del Código Nacional de Tránsito, también deben exonerarse todas aquellas <b>FOTODETECCIONES</b> en donde no se hubiera podido establecer plenamente la identidad del infractor ya que la sentencia C – 530 del año 2003 al analizar una demanda de nulidad por inconstitucionalidad de uno de los apartes del artículo 129 del Código Nacional de Tránsito, también establecía que no se podía vincular automáticamente al propietario del vehículo al proceso contravencional sin que existieran elementos de prueba que permitieran inferir que el propietario era el infractor.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">En palabras de la Corte:</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>LA RESPONSABILIDAD SOLIDARIA EXISTENTE ENTRE EL CONDUCTOR Y EL PROPIETARIO DEL VEHÍCULO, POR LAS INFRACCIONES DETECTADAS POR MEDIOS TECNOLÓGICOS (FOTOMULTAS), ES INCONSTITUCIONAL, AL NO EXIGIR EXPRESAMENTE, PARA SER SANCIONADO CON MULTA, QUE LA FALTA LE SEA PERSONALMENTE IMPUTABLE Y PERMITIR, POR LO TANTO, UNA FORMA DE RESPONSABILIDAD SANCIONATORIA POR EL HECHO AJENO.</b></span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">Luego de precisar el alcance del principio de responsabilidad personal en materia sancionatoria, que exige imputación personal de las infracciones, como garantía imprescindible frente al ejercicio del poder punitivo estatal (ius puniendi) y de diferenciarlo del principio de culpabilidad, concluyó este tribunal que la solidaridad prevista en la legislación civil no es plenamente aplicable a las sanciones impuestas por el Estado, al estar involucrados principios constitucionales ligados al ejercicio del poder punitivo estatal por lo que: (i) la solidaridad en materia sancionatoria administrativa es constitucional, a condición de (a) garantizar el debido proceso de los obligados, lo que implica que la carga de la prueba de los elementos de la responsabilidad, incluida la imputación personal de la infracción, le corresponde al Estado, en razón de la presunción de inocencia y que a quienes se pretenda endilgar una responsabilidad solidaria, deben ser vinculados al procedimiento administrativo en el que se impondría la respectiva sanción, para permitir el ejercicio pleno y efectivo de su derecho a la defensa; (b) respetar el principio de responsabilidad personal de las sanciones, lo que implica demostrar que la infracción fue cometida por aquel a quien la ley le atribuye responsabilidad solidaria o participó de alguna manera efectiva en su realización; y (c) demostrar que la infracción fue cometida de manera culpable, es decir, sin que sea factible una forma de responsabilidad objetiva.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">Determinó la Corte que la norma demandada adolece de ambigüedades en su redacción y por consiguiente, genera incertidumbre en cuanto al respeto de garantías constitucionales ineludibles en el ejercicio del poder punitivo del Estado. Así, (i) aunque garantiza nominalmente el derecho a la defensa, al prever la vinculación del propietario del vehículo al procedimiento administrativo, vulnera, en realidad, dicha garantía constitucional, porque omite de la defensa lo relativo a la imputabilidad y la culpabilidad, al hacer directamente responsable al propietario del vehículo, por el solo hecho de ser el titular del mismo -imputación real, mas no personal-. (ii) Desconoce el principio de responsabilidad personal o imputabilidad personal, porque no exige que la comisión de la infracción le sea personalmente imputable al propietario del vehículo, quien podría ser una persona jurídica y (iii) vulnera la presunción de inocencia, porque aunque no establece expresamente que la responsabilidad es objetiva o que existe presunción de culpa, al no requerir imputabilidad personal de la infracción, tampoco exige que la autoridad de tránsito demuestre que la infracción se cometió de manera culpable. Ante el incumplimiento de garantías mínimas del ejercicio legítimo del poder punitivo del Estado, la Sala Plena de la Corte Constitucional declaró, por consiguiente, la inexequibilidad de la norma demandada.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">En concepto número <b>C – 6417 expediente D – 12519 del 19 de julio de 2018</b> de la Procuraduría General de la Nación, dicha corporación le solicitó a la Corte Constitucional que declarara inexequible el parágrafo 1 del artículo 8 de la ley 1843 de 2017 que establece que serán solidariamente responsables el conductor y el dueño del vehículo por las <b>FOTODETECCIONES</b>. Eso significa que ya la Procuraduría estableció que no hay razón para que una persona que ni siquiera ha sido notificada ni se ha enterado de sanción de tránsito alguna deba ser endilgada con una serie de multas que ni siquiera cometió. La Procuraduría también habla de cómo no se puede imponer la carga de la prueba al ciudadano para que demuestre su inocencia sino como es el estado o más bien quien acusa (el tránsito) quien debe demostrar la culpabilidad. También habla de como si bien en nuestro ordenamiento jurídico se establece la posibilidad de la responsabilidad objetiva, esta no es óbice para violar el debido proceso u obligarle a pagar por una actuación que no cometió o que no se demostró que cometió.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
   <span class="font-size2">Igualmente, se debe tener en cuenta el <b><u>principio de la LEGALIDAD establecido en los artículos 6, 209 y 230 de la Constitución Política de Colombia</u></b> el cual se resume en que ningún funcionario público puede actuar sino en base a las leyes válidas y vigentes y no puede omitir o excederse en el ejercicio de sus funciones.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
@@ -600,6 +796,9 @@ background-color: #666666;
 </div>
 <div class="row m2" style="text-align:justify;">
   <span class="font-size2">ARTÍCULO 14. Salvo norma legal especial y <b><u>so pena de sanción disciplinaria</u></b>, toda petición deberá resolverse dentro de los quince (15) días siguientes a su recepción.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>SALVEDAD:</b> A partir de lo preceptuado en el presente párrafo, solo será válido la correspondiente firma del peticionario, puesto que, todo espacio que aparezca en blanco en el actual documento no puede ser rellenado con ninguna otra clausula, condición o petición que afecte la estructura o adultere los hechos del peticionario.</span>
 </div>
 <div class="row m2">
   <span class="font-size2"><b>NOTIFICACIÓN:</b></span>
@@ -616,7 +815,11 @@ $footer='<table>
       <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
       <span class="font-size2 m4"><b>Cordialmente,</b></span><br>
       <span class="font-size3"><b>'.mb_strtoupper($datos['newPetitioner']).'</b><br>
-      <b>'.$datos['newPetitionerIdType'].'</b> No.<b>'.$datos['newPetitionerId'].'</b> de <b>'.mb_strtoupper($datos['newPetitionerExpedition']).'</b></span>
+      <b>'.$datos['newPetitionerIdType'].'</b> No.<b>'.$datos['newPetitionerId'].'</b>';
+      if (isset($datos['newPetitionerExpedition']) && $datos['newPetitionerExpedition'] != '' && $datos['newPetitionerExpedition'] != null) {
+         $footer.=' de <b>'.mb_strtoupper($datos['newPetitionerExpedition']).'</b>';
+       }
+       $footer.='</span>
     </td>
   </tr>
 </table>';
@@ -629,6 +832,7 @@ $footer='<table>
         $mpdf->SetHeader('Codigo ludcis.com|'.$_POST['newCode'].'|{PAGENO}');
         $mpdf->SetProtection(array('print','print-highres'), '', '');
         $mpdf->WriteHTML($html);
+        $mpdf->AddPage();
         $mpdf->defaultfooterline = 0;
         $mpdf->setFooter($footer);
         $codigo = sha1($document->id);
@@ -651,7 +855,7 @@ $footer='<table>
         if (!is_object($document)) {
           return redirect('/');        
         }
-        if ($document->product->value > 0 && $document->payment_state = 0) {
+        if ($document->product->value > 0 && $document->payment_state == 0) {
           return redirect('/');        
         }
         if ($document->document_state == 1) {
@@ -753,7 +957,7 @@ background-color: #666666;
       $html .= '</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b>'.mb_strtoupper($datos['newGrantor']).'</b>, mayor y vecino de la ciudad de <b>'.mb_strtoupper($datos['newGrantorCity']).'</b>, identificado (a) con <b>'.$datos['newGrantorIdType'].'</b> No. <b>'.$datos['newGrantorId'].'</b> expedida en <b>'.mb_strtoupper($datos['newGrantorExpedition']).'</b> obrando ';
+  <span class="font-size2"><b>'.mb_strtoupper($datos['newGrantor']).'</b>, mayor y vecino de la ciudad de <b>'.ucfirst($datos['newGrantorCity']).'</b>, identificado (a) con <b>'.$datos['newGrantorIdType'].'</b> No. <b>'.number_format($datos['newGrantorId']).'</b> expedida en <b>'.mb_strtoupper($datos['newGrantorExpedition']).'</b> obrando ';
        if ($datos['newRepresentedNumber'] > 0) {
           $html .='como representante de: ';
         for ($i = 1; $i <= $datos['newRepresentedNumber']; $i++) {
@@ -773,9 +977,9 @@ background-color: #666666;
        }else{
           $html .=' de mis derechos legales y constitucionales';
        }
-      $html .= ', muy comedidamente manifiesto a Usted que, por medio del presente escrito confiero poder especial amplio y suficiente a '.$datos['newAgentTitle'].' <b>'.mb_strtoupper($datos['newAgent']).'</b>, identificado (a) con <b>'.$datos['newAgentIdType'].'</b>, expedida en <b>'.mb_strtoupper($datos['newAgentExpedition']).'</b>';
+      $html .= ', muy comedidamente manifiesto a Usted que, por medio del presente escrito confiero poder especial amplio y suficiente a '.$datos['newAgentTitle'].' <b>'.mb_strtoupper($datos['newAgent']).'</b>, identificado (a) con <b>'.$datos['newAgentIdType'].'</b>, No. <b>'.number_format($datos['newAgentId']).'</b> expedida en <b>'.mb_strtoupper($datos['newAgentExpedition']).'</b>';
        if ($datos['newAgentGraduate'] == 'Si') {
-          $html .=' y portador de la tarjeta profesional No. <b>'.$datos['newAgentGraduateNumber'].'</b> del C.S.J';
+          $html .=' y portador de la tarjeta profesional No. <b>'.number_format($datos['newAgentGraduateNumber']).'</b> del C.S.J';
        }
       $html .= ', para que formule ante su despacho '.$datos['newFormulation'].'.</span>
 </div>
@@ -784,6 +988,9 @@ background-color: #666666;
 </div>
 <div class="row m2" style="text-align:justify;">
   <span class="font-size2">Sírvase Señor <b>'.mb_strtoupper($datos['newReceiver']).'</b>, reconocer personería a mi apoderado para los efectos y dentro de los términos del presente mandato, y para los todos los efectos de ley estipulados en el presente poder.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>SALVEDAD:</b> A partir de lo preceptuado en el presente párrafo, solo será válido las correspondientes firmas, puesto que, todo espacio que aparezca en blanco en el actual documento no puede ser rellenado con ninguna otra clausula, condición o petición que afecte la estructura o adultere la información del mismo.</span>
 </div>
 </body>
 </html>';
@@ -794,7 +1001,7 @@ $footer='<table>
       <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
       <span class="font-size2 m4">Atentamente, </span><br>
       <span class="font-size3"><b>'.mb_strtoupper($datos['newGrantor']).'</b><br>
-      <b>'.$datos['newGrantorIdType'].'</b> No. <b>'.$datos['newGrantorId'].'</b> de <b>'.$datos['newGrantorExpedition'].'</b></span>
+      <b>'.$datos['newGrantorIdType'].' No. '.number_format($datos['newGrantorId']).' de '.$datos['newGrantorExpedition'].'</b></span>
     </div>
     <br>
     <br>
@@ -803,9 +1010,9 @@ $footer='<table>
       <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
       <span class="font-size2"><b>ACEPTO</b></span><br>
       <span class="font-size3"><b>'.mb_strtoupper($datos['newAgent']).'</b><br>
-      <b>'.$datos['newAgentIdType'].'</b> No. <b>'.$datos['newAgentId'].'</b> de <b>'.$datos['newAgentExpedition'].'</b>';
+      <b>'.$datos['newAgentIdType'].' No. '.number_format($datos['newAgentId']).' de '.$datos['newAgentExpedition'].'</b>';
        if ($datos['newAgentGraduate'] == 'Si') {
-          $footer .='<br><b>TP</b> No.<b>'.$datos['newAgentGraduateNumber'].'<b>';
+          $footer .='<br>TP No. '.number_format($datos['newAgentGraduateNumber']).'<b>';
        }
       $footer .= '</span>
     </div>
@@ -821,6 +1028,7 @@ $footer='<table>
         $mpdf->SetHeader('Codigo ludcis.com|'.$_POST['newCode'].'|{PAGENO}');
         $mpdf->SetProtection(array('print','print-highres'), '', '');
         $mpdf->WriteHTML($html);
+        $mpdf->AddPage();
         $mpdf->defaultfooterline = 0;
         $mpdf->setFooter($footer);
         $codigo = sha1($document->id);
@@ -843,7 +1051,7 @@ $footer='<table>
         if (!is_object($document)) {
           return redirect('/');        
         }
-        if ($document->product->value > 0 && $document->payment_state = 0) {
+        if ($document->product->value > 0 && $document->payment_state == 0) {
           return redirect('/');        
         }
         if ($document->document_state == 1) {
@@ -941,7 +1149,7 @@ background-color: #666666;
   <span class="font-size2">ASUNTO: PODER ESPECIAL AMPLIO Y SUFICIENTE OTORGADO POR REPRESENTANTE LEGAL DE PERSONA JURÍDICA</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b>'.mb_strtoupper($datos['newGrantor']).'</b>, mayor y vecino de la ciudad de <b>'.mb_strtoupper($datos['newGrantorCity']).'</b>, identificado (a) con <b>'.$datos['newGrantorIdType'].'</b> Nro. <b>'.$datos['newGrantorId'].'</b> expedida en <b>'.mb_strtoupper($datos['newGrantorExpedition']).'</b> obrando en mi condicion de representante legal de la Empresa <b>'.mb_strtolower($datos['newCompany']).'</b> registrada con <b>'.$datos['newCompanyIdType'].'</b> No. <b>'.$datos['newCompanyId'].'</b>, sociedad domiciliada en <b>'.mb_strtoupper($datos['newCompanyCity']).'</b>, en uso de mis enteras facultades, en ejercicio de mis derechos legales y constitucionales, muy comedidamente manifiesto a Usted que, por medio del presente escrito confiero poder especial amplio y suficiente a '.$datos['newAgentTitle'].' <b>'.mb_strtoupper($datos['newAgent']).'</b>, identificado (a) con <b>'.$datos['newAgentIdType'].'</b>, expedida en <b>'.$datos['newAgentExpedition'].'</b>';
+  <span class="font-size2"><b>'.mb_strtoupper($datos['newGrantor']).'</b>, mayor y vecino de la ciudad de <b>'.mb_strtoupper($datos['newGrantorCity']).'</b>, identificado (a) con <b>'.$datos['newGrantorIdType'].'</b> Nro. <b>'.$datos['newGrantorId'].'</b> expedida en <b>'.mb_strtoupper($datos['newGrantorExpedition']).'</b> obrando en mi condicion de representante legal de la Empresa <b>'.mb_strtoupper($datos['newCompany']).'</b> registrada con <b>'.$datos['newCompanyIdType'].'</b> No. <b>'.$datos['newCompanyId'].'</b>, sociedad domiciliada en <b>'.mb_strtoupper($datos['newCompanyCity']).'</b>, en uso de mis enteras facultades, en ejercicio de mis derechos legales y constitucionales, muy comedidamente manifiesto a Usted que, por medio del presente escrito confiero poder especial amplio y suficiente a '.$datos['newAgentTitle'].' <b>'.mb_strtoupper($datos['newAgent']).'</b>, identificado (a) con <b>'.$datos['newAgentIdType'].'</b>, expedida en <b>'.$datos['newAgentExpedition'].'</b>';
        if ($datos['newAgentGraduate'] == 'Si') {
           $html .=' y portador de la tarjeta profesional No. '.$datos['newAgentGraduateNumber'].' del C.S.J';
        }
@@ -952,6 +1160,9 @@ background-color: #666666;
 </div>
 <div class="row m2" style="text-align:justify;">
   <span class="font-size2">Sírvase Señor <b>'.mb_strtoupper($datos['newReceiver']).'</b>, reconocer personería a mi apoderado para los efectos y dentro de los términos del presente mandato, y para los todos los efectos de ley estipulados en el presente poder.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>SALVEDAD:</b> A partir de lo preceptuado en el presente párrafo, solo será válido las correspondientes firmas, puesto que, todo espacio que aparezca en blanco en el actual documento no puede ser rellenado con ninguna otra clausula, condición o petición que afecte la estructura o adultere la información del mismo.</span>
 </div>
 </body>
 </html>';
@@ -989,6 +1200,7 @@ $footer='<table>
         $mpdf->SetHeader('Codigo ludcis.com|'.$_POST['newCode'].'|{PAGENO}');
         $mpdf->SetProtection(array('print','print-highres'), '', '');
         $mpdf->WriteHTML($html);
+        $mpdf->AddPage();
         $mpdf->defaultfooterline = 0;
         $mpdf->setFooter($footer);
         $codigo = sha1($document->id);
@@ -1416,10 +1628,10 @@ background-color: #666666;
     <span class="font-size2"><b>Decima. Solución de controversias:</b> Las partes se comprometen a esforzarse en resolver mediante los mecanismos alternativos de solución de conflictos, contenidas en la ley 640 de 2001 y otras normas que la complementan, cualquier diferencia que surja, con motivo de la ejecución del presente <b>ACUERDO</b>. En caso de no llegar a una solución de manera directa de la controversia planteada, someterán el asunto en cuestión controvertido, a las leyes colombianas y a la jurisdicción competente en el momento de presentarse la diferencia, más específicamente, en el lugar donde se haya realizado la firma del <b>ACUERDO</b>.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-    <span class="font-size2"><b>Undécima. Legislación Aplicable:</b> Este <b>convenio</b> se regirá por las leyes de la República de Colombia y se interpretará de acuerdo con las mismas.</span>
+    <span class="font-size2"><b>Decimoprimera. Legislación Aplicable:</b> Este <b>convenio</b> se regirá por las leyes de la República de Colombia y se interpretará de acuerdo con las mismas.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-    <span class="font-size2"><b>Duodécima. Modificación o Terminación:</b> Este acuerdo solo podrá ser modificado o darse por terminado con el consentimiento expreso por escrito de ambas partes.</span>
+    <span class="font-size2"><b>Decimosegunda. Modificación o Terminación:</b> Este acuerdo solo podrá ser modificado o darse por terminado con el consentimiento expreso por escrito de ambas partes.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
     <span class="font-size2"><b>Decimotercera. Aceptación del Acuerdo:</b> Las partes han leído y asimilado de manera detenida el contenido, los términos y condiciones del presente <b>Convenio</b> y por tanto manifiestan estar conformes y aceptan todas las condiciones.</span>
@@ -1428,7 +1640,7 @@ background-color: #666666;
     <span class="font-size2"><b>Decimocuarta. Validez y Perfeccionamiento:</b>El presente Acuerdo requiere para su validez y perfeccionamiento la firma de las partes, las cuales se dan a continuación.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-    <span class="font-size2"><b>Decimoquinta. A partir de la presente clausula, solo será válido el parágrafo que advierte del número de copias o ejemplares, la fecha y/o lugar en que se desarrolla el contrato y las correspondientes firmas de las partes, puesto que, todo espacio que aparezca en blanco en el actual documento no puede ser rellenado con ninguna otra clausula o condición, que afecte u obligue a cualquiera de las partes contratantes.</span>
+    <span class="font-size2"><b>Decimoquinta.</b> A partir de la presente clausula, solo será válido el parágrafo que advierte del número de copias o ejemplares, la fecha y/o lugar en que se desarrolla el contrato y las correspondientes firmas de las partes, puesto que, todo espacio que aparezca en blanco en el actual documento no puede ser rellenado con ninguna otra clausula o condición, que afecte u obligue a cualquiera de las partes contratantes.</span>
 </div>
 <div class="row m3" style="text-align:justify;">
     <span class="font-size2">Dada en la ciudad de '.$datos['newCity'].', a los '.$hoy->format('d').' días del mes de '.$mes.' del año '.$hoy->format('Y').'.</span>
@@ -1463,6 +1675,7 @@ $footer=
         $mpdf->SetHeader('Codigo ludcis.com|'.$_POST['newCode'].'|{PAGENO}');
         $mpdf->SetProtection(array('print','print-highres'), '', '');
         $mpdf->WriteHTML($html);
+        $mpdf->AddPage();
         $mpdf->defaultfooterline = 0;
         $mpdf->setFooter($footer);
         $codigo = sha1($document->id);
@@ -1484,40 +1697,40 @@ $footer=
     public function mesLetras($hoy){
         switch ($hoy->format('m')) {
             case '01':
-                return 'Enero';
+                return 'enero';
                 break;
             case '02':
-                return 'Febrero';
+                return 'febrero';
                 break;
             case '03':
-                return 'Marzo';
+                return 'marzo';
                 break;
             case '04':
-                return 'Abril';
+                return 'abril';
                 break;
             case '05':
-                return 'Mayo';
+                return 'mayo';
                 break;
             case '06':
-                return 'Junio';
+                return 'junio';
                 break;
             case '07':
-                return 'Julio';
+                return 'julio';
                 break;
             case '08':
-                return 'Agosto';
+                return 'agosto';
                 break;
             case '09':
-                return 'Septiembre';
+                return 'septiembre';
                 break;
             case '10':
-                return 'Octubre';
+                return 'octubre';
                 break;
             case '11':
-                return 'Noviembre';
+                return 'noviembre';
                 break;
             case '12':
-                return 'Diciembre';
+                return 'diciembre';
                 break;
             default:
                 return "";
@@ -1541,9 +1754,9 @@ $footer=
         date_default_timezone_set('America/Bogota');
         $hoy = Carbon::now();
         $mes = $this->mesLetras($hoy);
-        $inicio = Carbon::parse($datos['newStartDate']);
+        $inicio = Carbon::createFromFormat('d/m/Y',$datos['newStartDate']);
         $mesInicio = $this->mesLetras($inicio);
-        $fin = Carbon::parse($datos['newEndDate']);
+        $fin = Carbon::createFromFormat('d/m/Y',$datos['newEndDate']);
         $dias = floor($inicio->diffInDays($fin));
         $valorLetrasTotal = ludcis\NumeroALetras::convertir($datos['newSalary'], 'pesos colombianos', 'centavos');
         $valorLetrasTotal .=' (COP).';
@@ -1627,44 +1840,74 @@ background-color: #666666;
 </style>
 </head>
 <body><div class="row m1" style="text-align:center;">
-    <span class="font-size"><b>CONTRATO DE PRESTACIÓN DE SERVICIOS PROFESIONALES DE '.mb_strtoupper($datos['newCharge']).'</b></span>
+    <span class="font-size"><b>CONTRATO DE PRESTACIÓN DE SERVICIOS ';
+    if (isset($datos['newSecondCardNumber']) && $datos['newSecondCardNumber']!="" && $datos['newSecondCardNumber']!=null) {
+       $html.='PROFESIONALES ';
+     } 
+     $html.='DE '.mb_strtoupper($datos['newCharge']).'</b></span>
 </div>
     <table style="width:100%" class="m2">
       <tr>
         <td class="col-4">
-          <span class="font-size-2"><b>Nombre del contratante: </b></span>
+          <span class="font-size-2"><b>Nombre del ';
+          if ($datos['newFirstType'] == 'PJ') {
+             $html.='representante';
+           }else {
+             $html.='contratante';
+           }
+           $html.= ': </b></span>
         </td>
         <td class="col-8" style="text-align:right; background-color:#bfbfbf">
           <span class="font-size-2"><b>'.mb_strtoupper($datos['newFirstPart']).'</b></span>
         </td>
-      </tr>
-      <tr>
+      </tr>';
+      if ($datos['newFirstType'] == 'PJ') {
+        $html.='<tr>
         <td class="col-4">
           <span class="font-size-2"><b>Domicilio de la empresa: </b></span>
         </td>
         <td class="col-8" style="text-align:right; background-color:#bfbfbf">
           <span class="font-size-2">'.$datos['newFirstAddress'].'</span>
         </td>
+      </tr>';
+      }
+      $html.='<tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Nombre del contratista: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#bfbfbf">
+          <span class="font-size-2"><b>';
+          if ($datos['newSecondType'] == 'PN') {
+            $html.=mb_strtoupper($datos['newSecondPart']);
+          }else {
+            $html.=mb_strtoupper($datos['newSecondCompany']);
+          }
+          $html.='</b></span>
+        </td>
       </tr>
       <tr>
         <td class="col-4">
-          <span class="font-size-2"><b>Nombre del (la) contratista: </b></span>
+          <span class="font-size-2"><b>';
+          if ($datos['newSecondType'] == 'PN') {
+            $html.=mb_strtoupper($datos['newSecondIdType']);
+          }else {
+            $html.=mb_strtoupper($datos['newSecondCompanyIdType']);
+          }
+          $html.='</b></span>
         </td>
         <td class="col-8" style="text-align:right; background-color:#bfbfbf">
-          <span class="font-size-2"><b>'.mb_strtoupper($datos['newSecondPart']).'</b></span>
-        </td>
-      </tr>
-      <tr>
-        <td class="col-4">
-          <span class="font-size-2"><b>'.$datos['newSecondIdType'].': </b></span>
-        </td>
-        <td class="col-8" style="text-align:right; background-color:#bfbfbf">
-          <span class="font-size-2">'.$datos['newSecondId'].'</span>
+          <span class="font-size-2">';
+          if ($datos['newSecondType'] == 'PN') {
+            $html.=mb_strtoupper($datos['newSecondId']);
+          }else {
+            $html.=mb_strtoupper($datos['newSecondCompanyId']);
+          }
+          $html.='</span>
         </td>
        </tr>
       <tr>
         <td class="col-4">
-          <span class="font-size-2"><b>Domicilio del (la) contratista: </b></span>
+          <span class="font-size-2"><b>Domicilio del contratista: </b></span>
         </td>
         <td class="col-8" style="text-align:right; background-color:#bfbfbf">
           <span class="font-size-2">'.$datos['newSecondAddress'].'</span>
@@ -1672,13 +1915,14 @@ background-color: #666666;
       </tr>
       <tr>
         <td class="col-4">
-          <span class="font-size-2"><b>Teléfono del (la) contratista: </b></span>
+          <span class="font-size-2"><b>Teléfono del contratista: </b></span>
         </td>
         <td class="col-8" style="text-align:right; background-color:#bfbfbf">
           <span class="font-size-2">'.$datos['newSecondPhone'].'</span>
         </td>
-      </tr>
-      <tr>
+      </tr>';
+      if ($datos['newSecondType']=='PN') {
+        $html.='<tr>
         <td class="col-4">
           <span class="font-size-2"><b>Lugar y fecha de Nacimiento: </b></span>
         </td>
@@ -1717,8 +1961,26 @@ background-color: #666666;
         <td class="col-8" style="text-align:right; background-color:#bfbfbf">
           <span class="font-size-2">'.$datos['newSecondARP'].'</span>
         </td>
+       </tr>';
+      }else{
+        $html.='<tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Camara de comercio: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#bfbfbf">
+          <span class="font-size-2">'.$datos['newSecondCompanyCamera'].'</span>
+        </td>
        </tr>
       <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Número de registro: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#bfbfbf">
+          <span class="font-size-2">'.$datos['newSecondCompanyCameraNumber'].'</span>
+        </td>
+       </tr>';
+      }
+      $html.='<tr>
         <td class="col-4">
           <span class="font-size-2"><b>Cargo: </b></span>
         </td>
@@ -1747,11 +2009,44 @@ background-color: #666666;
           <span class="font-size-2"><b>Ciudad de contratación: </b></span>
         </td>
         <td class="col-8" style="text-align:right; background-color:#bfbfbf">
-          <span class="font-size-2">'.$datos['newContractCity'].'</span>
+          <span class="font-size-2">'.ucfirst($datos['newContractCity']).'</span>
         </td>
        </tr>
        </table>
-       <div class="row m2" style="text-align:justify;"><span class="font-size2">Entre la empresa '.$datos['newFirstCompany'].', empresa legalmente constituida Identificada con el '.$datos['newFirstCompanyIdType'].' No. '.$datos['newFirstCompanyId'].' y con domicilio principal en la '.$datos['newFirstAddress'].', Teléfono No. '.$datos['newFirstPhone'].'., misma representada legalmente por el (la) señor(a) <b>'.mb_strtoupper($datos['newFirstPart']).'</b>, Identificado (a) con '.$datos['newFirstIdType'].' No. '.$datos['newFirstId'].'</b> de <b>'.$datos['newFirstExpedition'].'</b> según certificado de la Cámara de Comercio '.$datos['newFirstCompanyCamera'].' No. '.$datos['newFirstCompanyCameraNumber'].', quien en adelante se denominará CONTRATANTE y por otra parte el (la) señor(a) <b>'.mb_strtoupper($datos['newSecondPart']).'</b>, identificado (a) con '.$datos['newSecondIdType'].' No. '.$datos['newSecondId'].'</b> de <b>'.$datos['newSecondExpedition'].'</b>, y tarjeta profesional No. '.$datos['newSecondProfesionalCard'].' y quien en adelante se denominará CONTRATISTA,hemos convenido en celebrar un contrato de prestación de servicios profesionales que se regulará por las cláusulas que a continuación se expresan y en general por las disposiciones del título XXVIII capítulo I del Libro Cuarto del Código Civil y Código de Comercio aplicables a la materia de qué trata este contrato: </span>
+       <div class="row m2" style="text-align:justify;"><span class="font-size2">Entre';
+       if ($datos['newFirstType']=='PJ') {
+          $html.=' la empresa '.$datos['newFirstCompany'].', empresa legalmente constituida Identificada con el '.$datos['newFirstCompanyIdType'].' No. '.$datos['newFirstCompanyId'].' y con domicilio principal en la '.$datos['newFirstAddress'].', Teléfono No. '.$datos['newFirstPhone'].'., misma representada legalmente por el (la) señor(a) <b>'.mb_strtoupper($datos['newFirstPart']).'</b>, Identificado (a) con '.$datos['newFirstIdType'].' No. '.$datos['newFirstId'].'</b>';
+          if (isset($datos['newFirstExpedition']) && $datos['newFirstExpedition'] != '' && $datos['newFirstExpedition'] != null) {
+              $html.=' de <b>'.$datos['newFirstExpedition'].'</b>';
+            }
+          $html .=' según certificado de la Cámara de Comercio '.$datos['newFirstCompanyCamera'].' No. '.$datos['newFirstCompanyCameraNumber'];
+        }else {
+          $html.=''.mb_strtoupper($datos['newFirstPart']).'</b>, identificado (a) con '.$datos['newFirstIdType'].' No. <b>'.$datos['newFirstId'].'</b>';
+         if (isset($datos['newFirstExpedition']) && $datos['newFirstExpedition'] != '' && $datos['newFirstExpedition'] != null) {
+            $html.=' de <b>'.$datos['newFirstExpedition'].'</b>';
+          }
+        }
+        $html.=', quien en adelante se denominará <b>CONTRATANTE</b> y por otra parte ';
+       if ($datos['newSecondType']=='PJ') {
+          $html.=' la empresa '.$datos['newSecondCompany'].', empresa legalmente constituida Identificada con el '.$datos['newSecondCompanyIdType'].' No. '.$datos['newSecondCompanyId'].' y con domicilio principal en la '.$datos['newSecondAddress'].', Teléfono No. '.$datos['newSecondPhone'].'., misma representada legalmente por el (la) señor(a) <b>'.mb_strtoupper($datos['newSecondPart']).'</b>, Identificado (a) con '.$datos['newSecondIdType'].' No. '.$datos['newSecondId'].'</b>';
+          if (isset($datos['newSecondExpedition']) && $datos['newSecondExpedition'] != '' && $datos['newSecondExpedition'] != null) {
+              $html.=' de <b>'.$datos['newSecondExpedition'].'</b>';
+            }
+          $html .=' según certificado de la Cámara de Comercio '.$datos['newSecondCompanyCamera'].' No. '.$datos['newSecondCompanyCameraNumber'];
+        }else {
+          $html.=''.mb_strtoupper($datos['newSecondPart']).'</b>, identificado (a) con '.$datos['newSecondIdType'].' No. <b>'.$datos['newSecondId'].'</b>';
+         if (isset($datos['newSecondExpedition']) && $datos['newSecondExpedition'] != '' && $datos['newSecondExpedition'] != null) {
+            $html.=' de <b>'.$datos['newSecondExpedition'].'</b>';
+          }
+        }
+        if ($datos['newSecondCard']=='Si') {
+          $html.=', y tarjeta profesional No. '.$datos['newSecondProfesionalCard'];
+        }
+        $html.=', quien en adelante se denominará <b>CONTRATISTA</b>,hemos convenido en celebrar un contrato de prestación de servicios ';
+        if (isset($datos['newSecondCardNumber']) && $datos['newSecondCardNumber']!="" && $datos['newSecondCardNumber']!=null) {
+           $html.='profesionales ';
+         } 
+         $html.='que se regulará por las cláusulas que a continuación se expresan y en general por las disposiciones del título XXVIII capítulo I del Libro Cuarto del Código Civil y Código de Comercio aplicables a la materia de qué trata este contrato: </span>
 </div>
 <div class="row m2" style="text-align:justify;">
   <span class="font-size2"><b><u>PRIMERA</u>.</b> Objeto.<b>El CONTRATISTA</b>, de manera independiente, sin subordinación o dependencia, utilizando sus propios medios, elementos de trabajo, todo tipo de gestión, con el más alto sentido de diligencia, ética y responsabilidad profesionales, prestará el servicio de '.$datos['newCharge'].'.</span>
@@ -1776,28 +2071,34 @@ background-color: #666666;
       $html .= 'El valor que, en consenso se aplica, no excederá las tarifas estipuladas por la ley o los contratantes.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>CUARTA</u>.</b>. Tramite. El trámite o servicio se realizará en la dirección '.$datos['newFirstAddress'].', los costos de traslado al sitio de herramientas y equipos, serán asumidos por el <b>CONTRATANTE</b>, mientras que el traslado personal del <b>CONTRATISTA</b> al sitio de prestación del servicio, se hará por sus propios medios.</span>
+  <span class="font-size2"><b><u>CUARTA</u>.</b>. Tramite. El trámite o servicio se realizará en';
+  if ($datos['newServiceLocation']=='Si') {
+     $html.=' la dirección '.$datos['newServiceAddress'];
+   }else {
+     $html.=' los puntos acordados por las partes';
+   }
+   $html.=', los costos de traslado al sitio de herramientas y equipos, serán asumidos por el <b>CONTRATANTE</b>, mientras que el traslado personal del <b>CONTRATISTA</b> al sitio de prestación del servicio, se hará por sus propios medios.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>QUINTA</u>.</b>Facultades. - EL CONTRATISTA queda expresamente facultado para '.$datos['newFaculties'].'.</span>
+  <span class="font-size2"><b><u>QUINTA</u>.</b>Facultades. - EL <b>CONTRATISTA</b> queda expresamente facultado para '.$datos['newFaculties'].'.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
   <span class="font-size2"><b><u>SEXTA</u>.</b>. Obligaciones del <b>CONTRATISTA</b>. Son obligaciones del <b>CONTRATISTA:</b> 1. Obrar con seriedad y diligencia en el servicio contratado, 2. Informar constantemente al <b>CONTRATANTE</b> sobre el proceso de la prestación de su servicio. 3. Atender las solicitudes y recomendaciones que haga <b>EL CONTRATANTE</b> o sus delegados, con la mayor prontitud.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>SEPTIMA</u>.</b>Obligaciones del <b>CONTRATANTE</b>. Son obligaciones del <b>CONTRATANTE:</b> 1. Cancelar los honorarios fijados al <b>CONTRATISTA</b>, según la forma que se pactó dentro de los términos debidos, so pena de incurrir en intereses por mora en la cancelación o devolución de los mismos. 2. Entregar toda la información, equipo. Herramientas y logística que solicite el <b>CONTRATISTA</b> para poder desarrollar con normalidad su labor independiente.</span>
+  <span class="font-size2"><b><u>SEPTIMA</u>.</b>Obligaciones del <b>CONTRATANTE</b>. Son obligaciones del <b>CONTRATANTE:</b> 1. Cancelar los honorarios fijados al <b>CONTRATISTA</b>, según la forma que se pactó dentro de los términos debidos, so pena de incurrir en intereses por mora en la cancelación o devolución de estos. 2. Entregar toda la información, equipo. Herramientas y logística que solicite el <b>CONTRATISTA</b> para poder desarrollar con normalidad su labor independiente.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>OCTAVA</u>.</b>Terminación anticipada o anormal. – Incumplir las obligaciones propias de cada una de las partes, dará lugar a la otra para terminar unilateralmente el Contrato de Prestación de Servicio.</span>
+  <span class="font-size2"><b><u>OCTAVA</u>.</b>Cláusula compromisoria. – El incumplimiento de las obligaciones de este contrato, dará lugar a la parte allanada a cumplir, la potestad de exigir de la otra el pago total del dinero contratado o la devolución de una porción de esta, según el alcance y las labores realizadas en el contrato.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>NOVENA</u>.</b>Cláusula compromisoria. – Toda controversia o diferencia relativa a este contrato, su ejecución y liquidación, se resolverá por un tribunal de arbitramento que por economía será designado por las partes y será del domicilio donde se debió ejecutar el servicio contratado o en su defecto en el domicilio de la parte que lo convoque. El tribunal de Arbitramento se sujetará a lo dispuesto en el decreto 1818 de 1998 o estatuto orgánico de los sistemas alternativos de solución de conflictos y demás normas concordantes. En todo caso, este contrato presta mérito ejecutivo por ser una obligación clara, expresa y exigible para las partes.</span>
+  <span class="font-size2"><b><u>NOVENA</u>.</b>Controversias. - Toda controversia o diferencia relativa a este contrato, su ejecución y liquidación, se resolverá por un tribunal de arbitramento que por economía será designado por las partes, mismas que pactan que sea el municipio de Medellín, o en su defecto, en el domicilio donde se debió ejecutar el servicio contratado. El tribunal de Arbitramento se sujetará a lo dispuesto en el decreto 1818 de 1998 o estatuto orgánico de los sistemas alternativos de solución de conflictos y demás normas concordantes. En todo caso, este contrato <b>PRESTA MÉRITO EJECUTIVO</b> por ser una obligación clara, expresa y exigible para las partes.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
   <span class="font-size2"><b><u>DECIMA</u>.</b>A partir de la presente clausula, solo será válido el parágrafo que advierte del número de copias o ejemplares, la fecha y/o lugar en que se desarrolla el contrato y las correspondientes firmas de las partes, puesto que, todo espacio que aparezca en blanco en el actual documento no puede ser rellenado con ninguna otra clausula o condición, que afecte u obligue a cualquiera de las partes contratantes.</span>
 </div>
 <div class="row m3" style="text-align:justify;">
-    <span class="font-size2">Este Contrato de Prestación de Servicios se firma en dos ejemplares para las partes en '.$datos['newContractCity'].', a los '.$hoy->format('d').' días del mes de '.$mes.' del año '.$hoy->format('Y').'.</span>
+    <span class="font-size2">Este Contrato de Prestación de Servicios se firma en dos ejemplares para las partes en '.ucfirst($datos['newContractCity']).', a los '.$hoy->format('d').' días del mes de '.$mes.' del año '.$hoy->format('Y').'.</span>
 </div>
 <br>
 <br>
@@ -1808,17 +2109,20 @@ $footer=
   <tr>
   <td class="col-6">
   <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
-  <span class="font-size2 start"><b>EL CONTRATANTE</b></span><br>
-      <span class="font-size3 start">'.$datos['newFirstCompany'].'<br>
-      <b>'.$datos['newFirstCompanyIdType'].'</b> No. <b>'.$datos['newFirstCompanyId'].'<br>
-      Representante Legal</span>
-  </td>
+  <span class="font-size2 start"><b>EL CONTRATANTE</b></span><br>';
+  if ($datos['newFirstType']=='PJ') {
+    $footer.='<span class="font-size3 start">'.$datos['newFirstCompany'].'<br>
+      <b>'.$datos['newFirstCompanyIdType'].'</b> No. <b>'.$datos['newFirstCompanyId'].'</span>';
+  }else{
+    $footer.='<span class="font-size3 start">'.$datos['newFirstPart'].'<br>
+      <b>'.$datos['newFirstIdType'].' No. '.$datos['newFirstId'].'</span>';
+  }
+  $footer.='</td>
   <td class="col-6">
   <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
   <span class="font-size2 start"><b>EL CONTRATISTA</b></span><br>
       <span class="font-size3 start"><b>'.mb_strtoupper($datos['newSecondPart']).'</b><br>
-      <b>'.$datos['newSecondIdType'].'</b> No. <b>'.$datos['newSecondId'].'<br>
-      Prestador</span>
+      <b>'.$datos['newSecondIdType'].' No. '.$datos['newSecondId'].'</span>
   </td>
   </tr>
 </table>';
@@ -1831,6 +2135,7 @@ $footer=
         $mpdf->SetHeader('Codigo ludcis.com|'.$_POST['newCode'].'|{PAGENO}');
         $mpdf->SetProtection(array('print','print-highres'), '', '');
         $mpdf->WriteHTML($html);
+        $mpdf->AddPage();
         $mpdf->defaultfooterline = 0;
         $mpdf->setFooter($footer);
         $codigo = sha1($document->id);
@@ -1866,9 +2171,9 @@ $footer=
         date_default_timezone_set('America/Bogota');
         $hoy = Carbon::now();
         $mes = $this->mesLetras($hoy);
-        $inicio = Carbon::parse($datos['newStartDate']);
+        $inicio = Carbon::createFromFormat('d/m/Y',$datos['newStartDate']);
         $mesInicio = $this->mesLetras($inicio);
-        $fin = Carbon::parse($datos['newEndDate']);
+        $fin = Carbon::createFromFormat('d/m/Y',$datos['newEndDate']);
         $mesFin = $this->mesLetras($fin);
         $dias = floor($inicio->diffInDays($fin));
         $meses = floor($inicio->diffInMonths($fin));
@@ -2081,6 +2386,7 @@ $footer=
         $mpdf->SetHeader('Codigo ludcis.com|'.$_POST['newCode'].'|{PAGENO}');
         $mpdf->SetProtection(array('print','print-highres'), '', '');
         $mpdf->WriteHTML($html);
+        $mpdf->AddPage();
         $mpdf->defaultfooterline = 0;
         $mpdf->setFooter($footer);
         $codigo = sha1($document->id);
@@ -2116,8 +2422,9 @@ $footer=
         date_default_timezone_set('America/Bogota');
         $hoy = Carbon::now();
         $mes = $this->mesLetras($hoy);
-        $inicio = Carbon::parse($datos['newStartDate']);
-        $fin = Carbon::parse($datos['newEndDate']);
+        $inicio = Carbon::createFromFormat('d/m/Y',$datos['newStartDate']);
+        $mesInicio = $this->mesLetras($inicio);
+        $fin = Carbon::createFromFormat('d/m/Y',$datos['newEndDate']);
         $dias = floor($inicio->diffInDays($fin));
         $valor = ludcis\NumeroALetras::convertir($datos['newValue'], 'pesos colombianos', 'centavos');
         $valor .=' (COP).';
@@ -2203,7 +2510,15 @@ background-color: #666666;
 <body><div class="row m1" style="text-align:center;">
     <span class="font-size"><b>CONTRATO DE COMODATO</b></span>
 </div>
-       <div class="row m2" style="text-align:justify;"><span class="font-size2">Entre los suscritos <b>'.mb_strtoupper($datos['newComodante']).'</b>, mayor de edad, vecino de '.$datos['newComodanteCity'].', identificado (a) con '.$datos['newComodanteIdType'].' número '.$datos['newComodanteId'].' expedida en '.$datos['newComodanteExpedition'].'</b>, quien en adelante se denominará <b>EL COMODANTE</b>, de una parte, y <b>'.mb_strtoupper($datos['newComodatario']).'</b> también mayor de edad, vecino de '.$datos['newComodatarioCity'].', identificado (a) con '.$datos['newComodatarioIdType'].' número '.$datos['newComodatarioId'].' expedida en '.$datos['newComodatarioExpedition'].'</b>, quien para efectos del presente instrumento se designará como <b>EL COMODATARIO</b>, de otra parte, manifestamos que hemos convenido celebrar el presente <b>CONTRATO DE COMODATO</b> que se regirá por las cláusulas que a continuación se señalan y en su defecto por la normatividad correspondiente del Código Civil.</span>
+       <div class="row m2" style="text-align:justify;"><span class="font-size2">Entre los suscritos <b>'.mb_strtoupper($datos['newComodante']).'</b>, mayor de edad, vecino de '.$datos['newComodanteCity'].', identificado (a) con '.$datos['newComodanteIdType'].' número '.$datos['newComodanteId'];
+       if ($datos['newComodanteExpedition'] != '' && $datos['newComodanteExpedition'] != null) {
+          $html.=' expedida en '.$datos['newComodanteExpedition'].'</b>';
+        }
+        $html.=', quien en adelante se denominará <b>EL COMODANTE</b>, de una parte, y <b>'.mb_strtoupper($datos['newComodatario']).'</b> también mayor de edad, vecino de '.$datos['newComodatarioCity'].', identificado (a) con '.$datos['newComodatarioIdType'].' número '.$datos['newComodatarioId'];
+        if ($datos['newComodatarioExpedition'] != '' && $datos['newComodatarioExpedition'] != null) {
+           $html.=' expedida en '.$datos['newComodatarioExpedition'].'</b>';
+         }
+         $html.=', quien para efectos del presente instrumento se designará como <b>EL COMODATARIO</b>, de otra parte, manifestamos que hemos convenido celebrar el presente <b>CONTRATO DE COMODATO</b> que se regirá por las cláusulas que a continuación se señalan y en su defecto por la normatividad correspondiente del Código Civil.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
   <span class="font-size2"><b>PRIMERA: - EL COMODANTE</b> entrega a <b>EL COMODATARIO</b> y éste recibe, a título de <b>COMODATO O PRÉSTAMO DE USO</b>, ';
@@ -2242,7 +2557,7 @@ background-color: #666666;
 </span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b>SEXTA:-</b> El presente contrato tiene una duración de '.$dias.' días, contados a partir de su firma.</span>
+  <span class="font-size2"><b>SEXTA:-</b> El presente contrato tiene una duración de '.$dias.' días, contados a partir de el dia '.$inicio->format('d').' de '.$mesInicio.' de '.$inicio->format('Y').'.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
   <span class="font-size2"><b>SEPTIMA:- </b>A la terminación del presente CONTRATO DE COMODATO, surge la obligación para EL COMODATARIO de restituir los bienes en perfecto estado de funcionamiento.</span>
@@ -2324,6 +2639,7 @@ $footer=
         $mpdf->SetHeader('Codigo ludcis.com|'.$_POST['newCode'].'|{PAGENO}');
         $mpdf->SetProtection(array('print','print-highres'), '', '');
         $mpdf->WriteHTML($html);
+        $mpdf->AddPage();
         $mpdf->defaultfooterline = 0;
         $mpdf->setFooter($footer);
         $codigo = sha1($document->id);
@@ -2447,63 +2763,75 @@ background-color: #666666;
         }else{
           $html .='mayor de edad ';
         }
-        $html .=' identificado (a) con '.$datos['newGrantorIdType'].' No. '.$datos['newGrantorId'].' expedida en '.$datos['newGrantorExpedition'].'</b> con domicilio en la '.$datos['newGrantorAddress'].' en el municipio de <b>'.mb_strtoupper($datos['newGrantorCity']).'</b> a quien en lo sucesivo se denominará <b>EL CEDENTE</b>; y de otra parte <b>'.mb_strtoupper($datos['newAssign']).'</b> ';
+        $html .=' identificado (a) con '.$datos['newGrantorIdType'].' No. '.number_format($datos['newGrantorId']);
+        if (isset($datos['newGrantorExpedition']) && $datos['newGrantorExpedition'] != '' && $datos['newGrantorExpedition'] != null) {
+           $html.=' expedida en '.$datos['newGrantorExpedition'].'</b>';
+         }
+         $html.=' con domicilio en la '.$datos['newGrantorAddress'].' en el municipio de <b>'.ucfirst($datos['newGrantorCity']).'</b> a quien en lo sucesivo se denominará <b>EL CEDENTE</b>; y de otra parte <b>'.mb_strtoupper($datos['newAssign']).'</b> ';
         if($datos['newAssignIdType']=='NIT'){
           $html .='empresa legalmente constituida';
         }else{
           $html .='mayor de edad ';
         }
-        $html .=' identificado (a) con '.$datos['newAssignIdType'].' No. '.$datos['newAssignId'].' expedida en '.$datos['newAssignExpedition'].'</b> con domicilio en la '.$datos['newAssignAddress'].' en el municipio de '.$datos['newAssignCity'].' a quien en lo sucesivo se denominará <b>EL CESIONARIO</b>; con la intervención de '.$datos['newCeded'].' ';
+        $html .=' identificado (a) con '.$datos['newAssignIdType'].' No. '.number_format($datos['newAssignId']);
+        if (isset($datos['newAssignExpedition']) && $datos['newAssignExpedition'] != '' && $datos['newAssignExpedition'] != null) {
+           $html.=' expedida en '.$datos['newAssignExpedition'].'</b>';
+         }
+         $html .=' con domicilio en la '.$datos['newAssignAddress'].' en el municipio de <b>'.ucfirst($datos['newAssignCity']).'</b> a quien en lo sucesivo se denominará <b>EL CESIONARIO</b>; con la intervención de '.$datos['newCeded'].' ';
         if($datos['newCededIdType']=='NIT'){
           $html .='empresa legalmente constituida';
         }else{
           $html .='mayor de edad ';
         }
-        $html .=' identificado (a) con '.$datos['newCededIdType'].' No. '.$datos['newCededId'].' expedida en '.$datos['newCededExpedition'].'</b> con domicilio en la '.$datos['newCededAddress'].' en el municipio de '.$datos['newCededCity'].' a quien en lo sucesivo se denominará <b>EL CEDIDO</b>; en los términos contenidos en las cláusulas siguientes:</span>
+        $html .=' identificado (a) con '.$datos['newCededIdType'].' No. '.number_format($datos['newCededId']);
+        if (isset($datos['newCededExpedition']) && $datos['newCededExpedition'] != '' && $datos['newCededExpedition'] != null) {
+           $html.=' expedida en '.$datos['newCededExpedition'].'</b>';
+         }
+         $html.=' con domicilio en la '.$datos['newCededAddress'].' en el municipio de <b>'.ucfirst($datos['newCededCity']).'</b> a quien en lo sucesivo se denominará <b>EL CEDIDO</b>; en los términos contenidos en las cláusulas siguientes:</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>PRIMERA</u>.-</b> Con fecha '.$datos['newStartDate'].' EL CEDIDO y EL CEDENTE, celebraron un contrato '.$datos['newContractType'].' del cual el primero '.$datos['newGrantorRol'].' cedió en favor del segundo '.$datos['newCededRol'].' la ejecución del contrato firmado entre estos';
+  <span class="font-size2"><b><u>PRIMERA</u>.-</b> Con fecha '.$datos['newStartDate'].' <b>EL CEDIDO</b> y <b>EL CEDENTE</b>, celebraron un contrato '.$datos['newContractType'].' del cual el primero '.$datos['newGrantorRol'].' cedió en favor del segundo '.$datos['newCededRol'].' la ejecución del contrato firmado entre estos';
         if($datos['newContractNotarialized']=='Si'){
           $html .=', identificado (a) e inscrito en la Notaria N.º '.$datos['newNotarie'].' de el Círculo '.$datos['newCircle'].' en los términos y condiciones pactadas en el referido contrato,';
         }
-        $html .=' que EL CEDIDO declara conocer.</span>
+        $html .=' que <b>EL CEDIDO</b> declara conocer.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>SEGUNDA</u>.-</b> Las partes dejan constancia de que, a la fecha de celebración del presente acto, el contrato de '.$datos['newContractType'].' a que se refiere la cláusula anterior viene siendo cumplido cabalmente por ambas, manteniendo plena vigencia hasta el día '.$datos['newEndDate'].' fecha en la cual vence el plazo pactado en el mismo. No obstante, EL CEDENTE ha decidido apartarse del contrato por razones personales, motivo por el cual se celebra este acto.</span>
+  <span class="font-size2"><b><u>SEGUNDA</u>.-</b> Las partes dejan constancia de que, a la fecha de celebración del presente acto, el contrato de '.$datos['newContractType'].' a que se refiere la cláusula anterior viene siendo cumplido cabalmente por ambas, manteniendo plena vigencia hasta el día '.$datos['newEndDate'].' fecha en la cual vence el plazo pactado en el mismo. No obstante, <b>EL CEDENTE</b> ha decidido apartarse del contrato por razones personales, motivo por el cual se celebra este acto.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>TERCERA</u>.-</b> EL CESIONARIO declara conocer todas y cada una de las estipulaciones del contrato en mención, así como el estado actual de la relación contractual existente entre EL CEDIDO y EL CEDENTE, habiendo tenido a la vista los documentos correspondientes.</span>
+  <span class="font-size2"><b><u>TERCERA</u>.- EL CESIONARIO</b> declara conocer todas y cada una de las estipulaciones del contrato en mención, así como el estado actual de la relación contractual existente entre <b>EL CEDIDO</b> y <b>EL CEDENTE</b>, habiendo tenido a la vista los documentos correspondientes.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>CUARTA</u>.-</b> Por el presente contrato, EL CEDENTE manifiesta su voluntad de ceder, a favor de EL CESIONARIO, la posición contractual que ostenta en el contrato de '.$datos['newContractType'].' a que se refiere la cláusula primera. A su turno, EL CESIONARIO asume dicha posición contractual en el mencionado contrato, obligándose a cumplir todas y cada una de las prestaciones pactadas originalmente en el mismo.</span>
+  <span class="font-size2"><b><u>CUARTA</u>.-</b> Por el presente contrato, <b>EL CEDENTE</b> manifiesta su voluntad de ceder, a favor de <b>EL CESIONARIO</b>, la posición contractual que ostenta en el contrato de '.$datos['newContractType'].' a que se refiere la cláusula primera. A su turno, <b>EL CESIONARIO</b> asume dicha posición contractual en el mencionado contrato, obligándose a cumplir todas y cada una de las prestaciones pactadas originalmente en el mismo.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>QUINTA</u>..-. En armonía con lo establecido por el artículo 887 de Código de Comercio, EL CEDIDO manifiesta en este acto su conformidad con la cesión de posición contractual convenida en la cláusula precedente, admitiendo como nuevo arrendatario a EL CESIONARIO sin restricción ni limitación alguna.
+  <span class="font-size2"><b><u>QUINTA</u>..-. En armonía con lo establecido por el artículo 887 de Código de Comercio, <b>EL CEDIDO</b> manifiesta en este acto su conformidad con la cesión de posición contractual convenida en la cláusula precedente, admitiendo como nuevo arrendatario a <b>EL CESIONARIO</b> sin restricción ni limitación alguna.
 </span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>SEXTA</u>.-</b> A consecuencia de la cesión de posición contractual pactada en la cláusula cuarta, queda entendido que, a partir de la fecha de suscripción del presente documento, EL CESIONARIO asume la calidad de contratante en el descrito en la cláusula primera y, por consecuencia, queda obligado frente a EL CEDIDO a cumplir todas y cada una de las prestaciones allí establecidas.</span>
+  <span class="font-size2"><b><u>SEXTA</u>.-</b> A consecuencia de la cesión de posición contractual pactada en la cláusula cuarta, queda entendido que, a partir de la fecha de suscripción del presente documento, <b>EL CESIONARIO</b> asume la calidad de contratante en el descrito en la cláusula primera y, por consecuencia, queda obligado frente a <b>EL CEDIDO</b> a cumplir todas y cada una de las prestaciones allí establecidas.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>SEPTIMA</u>.-</b> Queda entendido que tanto EL CEDIDO como EL CESIONARIO tienen expeditas las acciones legales correspondientes para exigirse recíprocamente el cumplimiento de las obligaciones derivadas del contrato de '.$datos['newContractType'].' a que alude la cláusula primera.</span>
+  <span class="font-size2"><b><u>SEPTIMA</u>.-</b> Queda entendido que tanto <b>EL CEDIDO</b> como <b>EL CESIONARIO</b> tienen expeditas las acciones legales correspondientes para exigirse recíprocamente el cumplimiento de las obligaciones derivadas del contrato de '.$datos['newContractType'].' a que alude la cláusula primera.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>OCTAVA</u>.-</b> Si bien en virtud del presente acto EL CEDENTE se aparta de sus derechos y obligaciones derivadas del contrato, asumirá la responsabilidad correspondiente durante el resto del plazo de dicho contrato, en caso de que EL CESIONARIO incumpla cualquiera de las obligaciones cedidas.</span>
+  <span class="font-size2"><b><u>OCTAVA</u>.-</b> Si bien en virtud del presente acto <b>EL CEDENTE</b> se aparta de sus derechos y obligaciones derivadas del contrato, asumirá la responsabilidad correspondiente durante el resto del plazo de dicho contrato, en caso de que <b>EL CESIONARIO</b> incumpla cualquiera de las obligaciones cedidas.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>NOVENA</u>.-</b> Las partes dejan establecido que la presente cesión de posición contractual tiene carácter absolutamente gratuito, por lo que EL CESIONARIO no está obligado al pago de contraprestación alguna en favor de EL CEDENTE.</span>
+  <span class="font-size2"><b><u>NOVENA</u>.-</b> Las partes dejan establecido que la presente cesión de posición contractual tiene carácter absolutamente gratuito, por lo que <b>EL CESIONARIO</b> no está obligado al pago de contraprestación alguna en favor de <b>EL CEDENTE</b>.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>DECIMA</u>.-</b> EL CEDENTE declara que la validez del contrato a que alude la cláusula primera, así como su vigencia, se encuentran plenamente acreditadas, por lo que aquél se obliga a garantizar y responder frente a EL CESIONARIO en caso de que se pruebe lo contrario.</span>
+  <span class="font-size2"><b><u>DECIMA</u>.- EL CEDENTE</b> declara que la validez del contrato a que alude la cláusula primera, así como su vigencia, se encuentran plenamente acreditadas, por lo que aquél se obliga a garantizar y responder frente a <b>EL CESIONARIO</b> en caso de que se pruebe lo contrario.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>DECIMA PRIMERA</u>.-</b> Las partes acuerdan que todos los gastos y tributos que origine la celebración y ejecución de este contrato serán asumidos por EL CESIONARIO, salvo que es de cargo de EL CEDENTE./span>
+  <span class="font-size2"><b><u>DECIMA PRIMERA</u>.-</b> Las partes acuerdan que todos los gastos y tributos que origine la celebración y ejecución de este contrato serán asumidos por <b>EL CESIONARIO</b>, salvo que es de cargo de <b>EL CEDENTE</b>./span>
 </div>
 <div class="row m2" style="text-align:justify;"> 
   <span class="font-size2"><b><u>Parágrafo:</u></b>Cualquier mejora realizada por EL ARRENDATARIO y no autorizada por el ARRENDADOR, quedará a favor del inmueble, sin que este deba ser cancelado por el ARRENDADOR.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>DECIMA SEGUNDA</u>.-</b> Toda controversia o diferencia relativa a este contrato, en cuanto a su ejecución y liquidación, se resolverá por un tribunal de arbitramento que, por economía procesal, será designado por las partes, mismas que pactan que sea en el municipio '.$datos['newContractCity'].', o en su defecto, en el domicilio donde se debió ejecutar el servicio contratado. El tribunal de Arbitramento se sujetará a lo dispuesto en el decreto 1818 de 1998 o estatuto orgánico de los sistemas alternativos de solución de conflictos y demás normas concordantes.</span>
+  <span class="font-size2"><b><u>DECIMA SEGUNDA</u>.-</b> Toda controversia o diferencia relativa a este contrato, en cuanto a su ejecución y liquidación, se resolverá por un tribunal de arbitramento que, por economía procesal, será designado por las partes, mismas que pactan que sea en el municipio '.ucfirst($datos['newContractCity']).', o en su defecto, en el domicilio donde se debió ejecutar el servicio contratado. El tribunal de Arbitramento se sujetará a lo dispuesto en el decreto 1818 de 1998 o estatuto orgánico de los sistemas alternativos de solución de conflictos y demás normas concordantes.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
   <span class="font-size2"><b><u>DECIMA TERCERA</u>.-</b> Para la validez de todas las comunicaciones y notificaciones a las partes, con motivo de la ejecución de este contrato, ambas señalan como sus respectivos domicilios los indicados en la introducción de este documento. El cambio de domicilio de cualquiera de las partes surtirá efecto desde la fecha de comunicación de dicho cambio a la otra parte, por cualquier medio escrito.</span>
@@ -2512,7 +2840,7 @@ background-color: #666666;
   <span class="font-size2"><b><u>DECIMA CUARTA</u>.-</b> A partir de la presente clausula, solo será válido el parágrafo que advierte del número de copias o ejemplares, la fecha y/o lugar en que se desarrolla el contrato y las correspondientes firmas de las partes, puesto que, todo espacio que aparezca en blanco en el actual documento no puede ser rellenado con ninguna otra clausula o condición, que afecte u obligue a cualquiera de las partes contratantes.</span>
 </div>
 <div class="row m3" style="text-align:justify;">
-    <span class="font-size2">En señal de conformidad, este CONTRATO DE CESION, se firma tres (3) ejemplares similares, del mismo tenor y valor, para cada una de las partes, en '.$datos['newContractCity'].', a los '.$hoy->format('d').' días del mes de '.$mes.' del año '.$hoy->format('Y').'.</span>
+    <span class="font-size2">En señal de conformidad, este CONTRATO DE CESION, se firma tres (3) ejemplares similares, del mismo tenor y valor, para cada una de las partes, en '.ucfirst($datos['newContractCity']).', a los '.$hoy->format('d').' días del mes de '.$mes.' del año '.$hoy->format('Y').'.</span>
 </div>
 <br>
 <br>
@@ -2525,21 +2853,22 @@ $footer=
   <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
   <span class="font-size2 start"><b>EL CEDENTE</b></span><br>
       <span class="font-size3 start"><b>'.mb_strtoupper($datos['newGrantor']).'</b><br>
-      <b>'.$datos['newGrantorIdType'].'</b> No. <b>'.$datos['newGrantorId'].'</span>
+      <b>'.$datos['newGrantorIdType'].' No. '.$datos['newGrantorId'].'</b></span>
   </td>
   <td class="col-6">
   <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
   <span class="font-size2 start"><b>EL CESIONARIO</b></span><br>
       <span class="font-size3 start"><b>'.mb_strtoupper($datos['newAssign']).'</b><br>
-      <b>'.$datos['newAssignIdType'].'</b> No. <b>'.$datos['newAssignId'].'</span>
+      <b>'.$datos['newAssignIdType'].' No. '.$datos['newAssignId'].'</b></span>
   </td>
   </tr>
   <tr>
   <td class="col-6">
+  <br><br><br>
   <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
   <span class="font-size2 start"><b>EL CEDIDO</b></span><br>
-      <span class="font-size3 start">'.$datos['newCeded'].'<br>
-      <b>'.$datos['newCededIdType'].'</b> No. <b>'.$datos['newCededId'].'</span>
+      <span class="font-size3 start"><b>'.mb_strtoupper($datos['newCeded']).'</b><br>
+      <b>'.$datos['newCededIdType'].' No. '.$datos['newCededId'].'</b></span>
   </td>
   <td class="col-6">
   </td>
@@ -2554,6 +2883,7 @@ $footer=
         $mpdf->SetHeader('Codigo ludcis.com|'.$_POST['newCode'].'|{PAGENO}');
         $mpdf->SetProtection(array('print','print-highres'), '', '');
         $mpdf->WriteHTML($html);
+        $mpdf->AddPage();
         $mpdf->defaultfooterline = 0;
         $mpdf->setFooter($footer);
         $codigo = sha1($document->id);
@@ -2589,10 +2919,10 @@ $footer=
         date_default_timezone_set('America/Bogota');
         $hoy = Carbon::now();
         $mes = $this->mesLetras($hoy);
-        $inicio = Carbon::parse($datos['newStartDate']);
+        $inicio = Carbon::createFromFormat('d/m/Y',$datos['newStartDate']);
         $mesInicio = $this->mesLetras($inicio);
         if (isset($datos['newEndDate'])) {
-          $fin = Carbon::parse($datos['newEndDate']);
+          $fin = Carbon::createFromFormat('d/m/Y',$datos['newEndDate']);
           $dias = floor($inicio->diffInDays($fin));
         }
         $diasPrueba = ludcis\NumeroALetras::convertir($datos['newTestDays']);
@@ -2805,7 +3135,7 @@ background-color: #666666;
         </td>
        </tr>
        </table>
-       <div class="row m2" style="text-align:justify;"><span class="font-size2">Entre las partes (<b>EMPLEADOR (A)</b> y <b>EMPLEADO (A)</b>), ambos (as) mayores de edad, capaces para contratar, identificadas como se anota anteriormente, libre y voluntariamente, suscribimos <b>EL PRESENTE CONTRATO DE TRABAJO DE SERVICIO DÓMESTICO <b>'.mb_strtoupper($datos['newContractType']).'</b>, y lo hacemos fundamentados en la Buena Fe, en especial, en el respeto a los principios del Derecho al Trabajo; con sujeción a las declaraciones y estipulaciones contenidas en las siguientes clausulas: </span>
+       <div class="row m2" style="text-align:justify;"><span class="font-size2">Entre las partes (<b>EMPLEADOR (A)</b> y <b>EMPLEADO (A)</b>), ambos (as) mayores de edad, capaces para contratar, identificadas como se anota anteriormente, libre y voluntariamente, suscribimos <b>EL PRESENTE CONTRATO DE TRABAJO DE SERVICIO DÓMESTICO '.mb_strtoupper($datos['newContractType']).'</b>, y lo hacemos fundamentados en la Buena Fe, en especial, en el respeto a los principios del Derecho al Trabajo; con sujeción a las declaraciones y estipulaciones contenidas en las siguientes clausulas: </span>
 </div>
 <div class="row m2" style="text-align:justify;">
   <span class="font-size2"><b><u>PRIMERA</u>.- Lugar: EL (LA) EMPLEADOR (A),</b> quien tiene su domicilio en la '.$datos['newFirstAddress'].', requiere contratar los servicios de una persona para las labores domésticas, en el domicilio antes señalado. <b>EL (LA) TRABAJADOR(A)</b>, desarrollará el objeto del <b>CONTRATO DE SERVICIO DOMÉSTICO <b>'.mb_strtoupper($datos['newContractType']).'</b> en la residencia <b>EL (LA) EMPLEADOR (A)</b>. En caso que este último, cambie de domicilio dentro de la misma ciudad, el contrato se entenderá modificado respecto al sitio de prestación de la labor.</span>
@@ -2868,7 +3198,7 @@ background-color: #666666;
   <span class="font-size2"><b><u>DECIMA SEPTIMA</u>.- Suscripción y validez:</b> Las partes, se ratifican en todas y cada una de las cláusulas precedentes, donde para constancia y plena validez de lo estipulado, firman este contrato en original y dos (2) ejemplares de igual tenor y valor, sin necesidad de testigos, en la ciudad y fecha que se indican a continuación.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
-  <span class="font-size2"><b><u>DECIMA OCTAVA</u>.- A partir de la presente clausula, solo será válido el parágrafo que advierte del número de copias o ejemplares, la fecha y/o lugar en que se desarrolla el contrato y las correspondientes firmas de las partes, puesto que, todo espacio que aparezca en blanco en el actual documento no puede ser rellenado con ninguna otra clausula o condición, que afecte u obligue a cualquiera de las partes contratantes.</span>
+  <span class="font-size2"><b><u>DECIMA OCTAVA</u>.</b>- A partir de la presente clausula, solo será válido el parágrafo que advierte del número de copias o ejemplares, la fecha y/o lugar en que se desarrolla el contrato y las correspondientes firmas de las partes, puesto que, todo espacio que aparezca en blanco en el actual documento no puede ser rellenado con ninguna otra clausula o condición, que afecte u obligue a cualquiera de las partes contratantes.</span>
 </div>
 <div class="row m3" style="text-align:justify;">
     <span class="font-size2">Se firma en la ciudad de '.$datos['newContractCity'].', a los '.$hoy->format('d').' días del mes de '.$mes.' del año '.$hoy->format('Y').'.</span>
@@ -2903,6 +3233,7 @@ $footer=
         $mpdf->SetHeader('Codigo ludcis.com|'.$_POST['newCode'].'|{PAGENO}');
         $mpdf->SetProtection(array('print','print-highres'), '', '');
         $mpdf->WriteHTML($html);
+        $mpdf->AddPage();
         $mpdf->defaultfooterline = 0;
         $mpdf->setFooter($footer);
         $codigo = sha1($document->id);
@@ -2926,9 +3257,9 @@ $footer=
         setlocale(LC_TIME, 'es_ES');
         date_default_timezone_set('America/Bogota');
         $datos = $_POST;
-        $inicio = Carbon::parse($datos['newStartDate']);
+        $inicio = Carbon::createFromFormat('d/m/Y',$datos['newStartDate']);
         if (isset($datos['newEndDate'])) {
-          $fin = Carbon::parse($datos['newEndDate']);
+          $fin = Carbon::createFromFormat('d/m/Y',$datos['newEndDate']);
           $mesFin = $this->mesLetras($fin);
         }
         if (!is_object($document)) {
@@ -3044,21 +3375,23 @@ background-color: #666666;
     <table style="width:100%" class="m2">
       <tr>
         <td class="col-4">
-          <span class="font-size-2"><b>Nombre del representante de la empresa: </b></span>
+          <span class="font-size-2"><b>Nombre del empleador o representante: </b></span>
         </td>
         <td class="col-8" style="text-align:right; background-color:#bfbfbf">
           <span class="font-size-2"><b>'.mb_strtoupper($datos['newFirstPart']).'</b></span>
         </td>
-      </tr>
-      <tr>
+      </tr>';
+      if ($datos['newFirstType']=='PJ') {
+        $html.='<tr>
         <td class="col-4">
           <span class="font-size-2"><b>Domicilio de la empresa: </b></span>
         </td>
         <td class="col-8" style="text-align:right; background-color:#bfbfbf">
           <span class="font-size-2">'.$datos['newFirstAddress'].'</span>
         </td>
-      </tr>
-      <tr>
+      </tr>';
+      }
+      $html.='<tr>
         <td class="col-4">
           <span class="font-size-2"><b>Nombre del (la) trabajador (a): </b></span>
         </td>
@@ -3165,7 +3498,15 @@ background-color: #666666;
        </table>
        <div class="row m2" style="text-align:justify;">Las partes, que suscribimos <b>EL PRESENTE CONTRATO DE TRABAJO <b>'.mb_strtoupper($datos['newContractType']).'</b>, lo hacemos fundamentados en la Buena Fe, y en especial en el respeto a los principios del Derecho de Trabajo.</span>
 </div>
-       <div class="row m2" style="text-align:justify;"><span class="font-size2"><b>'.mb_strtoupper($datos['newFirstPart']).'</b>, identificado (a) con '.$datos['newFirstIdType'].' No. <b>'.$datos['newFirstId'].'</b> de <b>'.$datos['newFirstExpedition'].'</b>, en mi calidad de empleador y Representante Legal de la empresa '.$datos['newFirstCompany'].', Identificada con '.$datos['newFirstCompanyIdType'].' No. '.$datos['newFirstCompanyId'].', con domicilio comercial en la '.$datos['newFirstAddress'].' de la ciudad de '.$datos['newFirstCity'].', quien en adelante se denominará EMPLEADOR y <b>'.mb_strtoupper($datos['newSecondPart']).'</b>, identificado (a) con '.$datos['newSecondIdType'].' No. '.$datos['newSecondId'].' residente en la ciudad de '.$datos['newSecondCity'].', quien en adelante se denominará TRABAJADOR, quien desempeñará el cargo de '.$datos['newCharge'].' acuerdan celebrar el presente CONTRATO INDIVIDUAL DE TRABAJO <b>'.mb_strtoupper($datos['newContractType']).'</b>, para ser ejecutado en la ciudad de '.$datos['newContractCity'].', el cual se regirá por las siguientes cláusulas:</span>
+       <div class="row m2" style="text-align:justify;"><span class="font-size2"><b>'.mb_strtoupper($datos['newFirstPart']).'</b>, identificado (a) con '.$datos['newFirstIdType'].' No. <b>'.$datos['newFirstId'].'</b>';
+       if (isset($datos['newFirstExpedition']) && $datos['newFirstExpedition'] != '' && $datos['newFirstExpedition'] != null) {
+          $html.=' de <b>'.$datos['newFirstExpedition'].'</b>';
+        }
+        $html.=', en mi calidad de empleador';
+        if ($datos['newFirstType']=='PJ') {
+           $html.=' en representación de la empresa '.$datos['newFirstCompany'].', Identificada con '.$datos['newFirstCompanyIdType'].' No. '.$datos['newFirstCompanyId'].', con domicilio comercial en la '.$datos['newFirstAddress'].' de la ciudad de '.$datos['newFirstCity'];
+         }
+         $html.=', quien en adelante se denominará EMPLEADOR y <b>'.mb_strtoupper($datos['newSecondPart']).'</b>, identificado (a) con '.$datos['newSecondIdType'].' No. '.$datos['newSecondId'].' residente en la ciudad de '.$datos['newSecondCity'].', quien en adelante se denominará TRABAJADOR, quien desempeñará el cargo de '.$datos['newCharge'].' acuerdan celebrar el presente CONTRATO INDIVIDUAL DE TRABAJO <b>'.mb_strtoupper($datos['newContractType']).'</b>, para ser ejecutado en la ciudad de '.$datos['newContractCity'].', el cual se regirá por las siguientes cláusulas:</span>
 </div>
 <div class="row m2" style="text-align:justify;">
   <span class="font-size2"><b><u>PRIMERA</u>. - EL EMPLEADOR</b> contrata los servicios personales de <b>EL TRABAJADOR</b> y éste se obliga: a) A poner al servicio del <b>EMPLEADOR</b> toda su  capacidad normal de trabajo, en forma exclusiva, en el desempeño de las funciones propias del oficio mencionado y en las labores anexas y complementarias del mismo, de conformidad con las órdenes e instrucciones que le imparta <b>EL EMPLEADOR</b> o sus representantes, las funciones y procedimientos establecidos para este, observando en su cumplimiento, la diligencia, honestidad, eficacia y el cuidado necesarios; y b) A no prestar directa ni indirectamente servicios laborales a otros <b>EMPLEADORES</b>, ni a trabajar por cuenta propia en el mismo oficio, en las instalaciones de la empresa y horarios laborales, durante la vigencia de este contrato.</span>
@@ -3315,10 +3656,15 @@ $footer=
   <tr>
   <td class="col-6">
   <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
-  <span class="font-size2 start"><b>EL EMPLEADOR</b></span><br>
-      <span class="font-size3 start">'.$datos['newFirstCompany'].'<br>
-      <b>'.$datos['newFirstCompanyIdType'].'</b> No. <b>'.$datos['newFirstCompanyId'].'</span>
-  </td>
+  <span class="font-size2 start"><b>EL EMPLEADOR</b></span><br>';
+  if ($datos['newFirstType']=='PJ') {
+    $footer.='<span class="font-size3 start">'.$datos['newFirstCompany'].'<br>
+      <b>'.$datos['newFirstCompanyIdType'].'</b> No. <b>'.$datos['newFirstCompanyId'].'</span>';
+  }else{
+    $footer.='<span class="font-size3 start">'.$datos['newFirstPart'].'<br>
+      <b>'.$datos['newFirstIdType'].'</b> No. <b>'.$datos['newFirstId'].'</span>';
+  }
+  $footer.='</td>
   <td class="col-6">
   <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
   <span class="font-size2 start"><b>EL TRABAJADOR</b></span><br>
@@ -3336,12 +3682,968 @@ $footer=
         $mpdf->SetHeader('Codigo ludcis.com|'.$_POST['newCode'].'|{PAGENO}');
         $mpdf->SetProtection(array('print','print-highres'), '', '');
         $mpdf->WriteHTML($html);
+        $mpdf->AddPage();
         $mpdf->defaultfooterline = 0;
         $mpdf->setFooter($footer);
         $codigo = sha1($document->id);
         $document->link = 'Views/documents/'.$document->product->code.'/contrato_trabajo_'.$codigo.'.pdf';
         $document->save();
         $mpdf->Output('Views/documents/'.$document->product->code.'/contrato_trabajo_'.$codigo.'.pdf','F');
+        $envio = ControladorGeneral::correo(ucwords($datos['newFirstPart']),$document->email,$document->product->name,$document->link,$hoy->format('d/m/Y'),$document->product->page,$qr,$document->product->pdf);
+        if ($envio=='ok') {
+          $enviado = new ludcis\Mail_log();
+          $enviado->document_id = $document->id;
+          $enviado->email = $document->email;
+          $enviado->save();  
+        }
+        $document->document_state=1;
+        $document->save();
+        unlink($document->link);
+        $mpdf->Output();
+    }
+    public function pdfTeletrabajo(){
+        $document = ludcis\Document::where('hash',$_POST['newCode'])->first();
+        setlocale(LC_TIME, 'es_ES');
+        date_default_timezone_set('America/Bogota');
+        $datos = $_POST;
+        $inicio = Carbon::createFromFormat('d/m/Y',$datos['newStartDate']);
+        if (isset($datos['newEndDate'])) {
+          $fin = Carbon::createFromFormat('d/m/Y',$datos['newEndDate']);
+          $mesFin = $this->mesLetras($fin);
+        }
+        if (!is_object($document)) {
+          return redirect('/');        
+        }
+        if ($document->product->value > 0 && $document->payment_state == 0) {
+          return redirect('/');        
+        }
+        if ($document->document_state == 1) {
+          return redirect('/');        
+        }
+        $diasPrueba = $datos['newTestDays'];
+        if ($_POST['newContractType']=='A término fijo inferior a un año') {
+          $diff = $inicio->diffInDays($fin);
+          $limite = floor($diff/5);
+          if ($diasPrueba>$limite) {
+            $diasPrueba=$limite;
+          }
+        }else{
+          if ($diasPrueba>60) {
+            $diasPrueba=60;
+          }
+        }
+        $document->email = $datos['newFirstEmail'];
+        $hoy = Carbon::now();
+        $mes = $this->mesLetras($hoy);
+        $mesInicio = $this->mesLetras($inicio);
+        $valorLetrasTotal = ludcis\NumeroALetras::convertir($datos['newSalary'], 'pesos colombianos', 'centavos');
+        $prueba = ludcis\NumeroALetras::convertir($diasPrueba);
+        $valorLetrasTotal .=' (COP).';
+        $qr = QrCode::format('png')->size(400)->errorCorrection('H')->color(60,60,59)->generate($document->product->page);
+        $html='<html>
+<head>
+<style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
+* {
+  box-sizing: border-box;
+}
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 100%;
+}
+tr{
+  width:100%;
+}
+td{
+  padding:5px;
+}
+*.backgroung-gray{
+background-color: #f1f2f2;
+}
+.row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+.row {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  margin-right: -7.5px;
+  margin-left: -7.5px;
+    width100%;
+}
+[class*="col-"] {
+  float: left;
+  padding: 15px;
+}
+.font-size{
+  font-size:25px;
+}
+.font-size-2{
+  font-size:16px;
+}
+.font-size-3{
+  font-size:16px;
+}
+.w-100{
+  width:100%;
+}
+.pl{
+  padding-left:5%
+}
+.m1{
+    margin-bottom: 60px;
+    margin-top: 25px;
+}
+.m2{
+    margin-bottom: 15px;
+}
+.m3{
+    margin-bottom: 60px;
+}
+*.col-1 {width: 8.33%;}
+*.col-2 {width: 16.66%;}
+*.col-3 {width: 25%;}
+*.col-4 {width: 33.33%;}
+*.col-5 {width: 41.66%;}
+*.col-6 {width: 50%;}
+*.col-7 {width: 58.33%;}
+*.col-8 {width: 66.66%;}
+*.col-9 {width: 75%;}
+*.col-10 {width: 83.33%;}
+*.col-11 {width: 91.66%;}
+*.col-12 {width: 100%;}
+</style>
+</head> 
+<body><div class="row m1" style="text-align:center;">
+    <span class="font-size"><b>CONTRATO DE TRABAJO MODALIDAD TELETRABAJO <b>'.mb_strtoupper($datos['newContractType']).'</b></span>
+</div>
+    <table style="width:100%" class="m2">
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Nombre del empleador o representante: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2"><b>'.mb_strtoupper($datos['newFirstPart']).'</b></span>
+        </td>
+      </tr>';
+      if ($datos['newFirstType']=="PJ") {
+        $html.='<tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Domicilio de la empresa: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.$datos['newFirstAddress'].'</span>
+        </td>
+      </tr>';
+      }
+      $html.='<tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Nombre del (la) trabajador (a): </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2"><b>'.mb_strtoupper($datos['newSecondPart']).'</b></span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>'.$datos['newSecondIdType'].': </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.$datos['newSecondId'].'</span>
+        </td>
+       </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Domicilio del (la) trabajador (a): </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.$datos['newSecondAddress'].' del barrio '.$datos['newSecondNeighborhood'].'</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Teléfono del (la) trabajador (a): </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.$datos['newSecondPhone'].'</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Lugar y fecha de Nacimiento: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.$datos['newSecondBornSite'].' el dia '.$datos['newSecondBornDate'].'</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Nacionalidad: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.$datos['newSecondNationality'].'</span>
+        </td>
+       </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>EPS: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.mb_strtoupper($datos['newSecondEPS']).'</span>
+        </td>
+       </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>AFP: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.mb_strtoupper($datos['newSecondAFP']).'</span>
+        </td>
+       </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>ARP: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.mb_strtoupper($datos['newSecondARP']).'</span>
+        </td>
+       </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Cargo: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.$datos['newCharge'].'</span>
+        </td>
+       </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Salario: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">$ '.number_format($datos['newSalary'],2).'</span>
+        </td>
+       </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Periodicidad: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.$datos['newPaymentCicle'].'</span>
+        </td>
+       </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Fecha de iniciación de labores: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.$datos['newStartDate'].'</span>
+        </td>
+       </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Ciudad de contratación: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.ucfirst($datos['newContractCity']).'</span>
+        </td>
+       </tr>
+       </table>
+       <div class="row m2" style="text-align:justify;">Las partes, que suscribimos <b>EL PRESENTE CONTRATO DE TRABAJO '.mb_strtoupper($datos['newContractType']).'</b>, lo hacemos fundamentados en la Buena Fe, y en especial en el respeto a los principios del Derecho de Trabajo.</span>
+</div>
+       <div class="row m2" style="text-align:justify;"><span class="font-size2"><b>'.mb_strtoupper($datos['newFirstPart']).'</b>, identificado (a) con '.$datos['newFirstIdType'].' No. <b>'.$datos['newFirstId'].'</b>';
+       if ($datos['newFirstExpedition'] != '' && $datos['newFirstExpedition'] != null) {
+          $html.=' de <b>'.$datos['newFirstExpedition'].'</b>';
+        }
+        $html.=', en mi calidad de <b>EMPLEADOR</b>';
+        if ($datos['newFirstType']=='PJ') {
+           $html.=' en representación de la empresa '.$datos['newFirstCompany'].', Identificada con '.$datos['newFirstCompanyIdType'].' No. '.$datos['newFirstCompanyId'].', con domicilio comercial en la '.$datos['newFirstAddress'].' de la ciudad de '.ucfirst($datos['newFirstCity']);
+         }
+         $html.=', quien en adelante se denominará <b>EMPLEADOR</b> y <b>'.mb_strtoupper($datos['newSecondPart']).'</b>, identificado (a) con '.$datos['newSecondIdType'].' No. '.$datos['newSecondId'].' residente en la ciudad de '.ucfirst($datos['newSecondCity']).', quien en adelante se denominará <b>TELETRABAJADOR</b>, quien desempeñará el cargo de '.$datos['newCharge'].' acuerdan celebrar el presente CONTRATO INDIVIDUAL DE TELETRABAJO <b>'.mb_strtoupper($datos['newContractType']).'</b>, para ser ejecutado en la '.$datos['newWorkAddress'].', el cual se regirá por las siguientes cláusulas:</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>PRIMERA</u>. - EL EMPLEADOR</b> contrata los servicios personales de <b>EL TELETRABAJADOR</b> y éste se obliga: a) A poner al servicio del <b>EMPLEADOR</b> toda su  capacidad normal de trabajo, en forma exclusiva, en el desempeño de las funciones propias del oficio mencionado y en las labores anexas y complementarias del mismo, de conformidad con las órdenes e instrucciones que le imparta <b>EL EMPLEADOR</b> o sus representantes, las funciones y procedimientos establecidos para este, observando en su cumplimiento, la diligencia, honestidad, eficacia y el cuidado necesarios; y b) A no prestar directa ni indirectamente servicios laborales a otros <b>EMPLEADORES</b>, ni a trabajar por cuenta propia en el mismo oficio, en su lugar de teletrabajo y horarios laborales, durante la vigencia de este contrato.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>SEGUNDA</u>. - </b>Las partes declaran que, en el presente contrato, se entienden incorporadas en lo pertinente, las disposiciones legales que regulan las relaciones entre <b>LA EMPRESA</b> y sus <b>TRABAJADORES</b>, en especial, las del contrato de trabajo para el oficio que se suscribe, fuera de las obligaciones consignadas en los reglamentos de trabajo y de higiene y seguridad industrial de la empresa.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>TERCERA</u>. - Lugar de Trabajo.</b>Para efectos del presente acuerdo, el <b>TRABAJADOR</b> desempeñara las funciones propias de su puesto de trabajo, bajo la modalidad de <b>TELETRABAJO</b>, en la '.$datos['newWorkAddress'].'. En dicho lugar el <b>TRABAJADOR</b> realizará su trabajo '.$datos['newWeekDays'].' días por semana.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO PRIMERO. - </b> Un día (1) a la semana u ocasionalmente (según lo acordado), <b>EL TELETRABAJADOR</b> deberá presentarse en las instalaciones del <b>EMPLEADOR</b>, para capacitaciones, evaluación de resultados, etc., sin que su presencia en las instalaciones signifique sustitución de <b>EL TELETRABAJO</b> por trabajo presencial.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO SEGUNDO. - </b> En caso de que <b>EL EMPLADOR</b> o <b>EL TELETRABAJADOR</b> quisieran modificar el lugar de trabajo, por trabajo presencial, se deberá acordar de mutuo acuerdo dicha modificación.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>CUARTA</u>. - Espacio de Trabajo. El TELETRABAJADOR</b> deberá realizar sus actividades laborales en el espacio acordado previamente por ÉL, <b>EL EMPLEADOR</b> y la <b>ARL</b>. No podrá ser en otros lugares que no cumplan con las condiciones de seguridad e higiene adecuadas.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>QUINTA</u>. - Derechos del Teletrabajador. El TELETRABAJADOR</b> tendrá derecho a disfrutar de todos los derechos mínimos consagrados en el C.S.T., en especial, los referentes a descansos, vacaciones, prestaciones sociales, afiliación integral a Seguridad Social. Asimismo, <b>EL TELETRABAJADOR</b> tendrá las mismas obligaciones laborales que los demás empleados, las cuales, en relación con la actividad propia de <b>EL EMPLEADO</b>, éste la ejecutará dentro de las siguientes modalidades que implican claras obligaciones para este así:</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>OBLIGACIONES ESPECIALES DEL TRABAJADOR: El TRABAJADOR </b>se obliga especialmente.</span>
+</div>
+<div class="row" style="text-align:justify;">
+    <ul>
+        <li class="font-size2 m2">A laborar la jornada ordinaria en los turnos y dentro de horas que asigne <b>LA EMPRESA</b>, pudiendo esta, ordenar los cambios o ajustes que sean necesarios para el adecuado funcionamiento de las actividades y labores.  Entendiendo que la jornada de trabajo se inicia cuando <b>EL TELETRABAJADOR</b> está listo y disponible en el sitio donde se desarrolla la labor.</li>
+        <li class="font-size2 m2">A no desempeñar labor alguna, ni ejercer otra actividad, fuera de las horas de trabajo al servicio del <b>EMPLEADOR</b>, que pueda afectar o poner en peligro su seguridad, su salud o su descanso.</li>
+        <li class="font-size2 m2">Prestar el servicio para el que fue contratado personalmente, en el lugar del territorio de la Republica de Colombia, que indicare <b>EL EMPLEADOR</b> y excepcionalmente, fuera de dicho territorio cuando las necesidades del servicio así lo requieran.</li>
+        <li class="font-size2 m2">Observar rigurosamente las normas que le fije la empresa para la realización de la labor a que se refiere el presente contrato.</li>
+        <li class="font-size2 m2">A prestar toda la colaboración necesaria en caso de siniestro o de riesgo que afecte o amenace a las personas o a los bienes de <b>LA EMPRESA</b>.</li>
+        <li class="font-size2 m2">A no atender durante las horas de trabajo, asuntos o actividades distintas de las que <b>LA EMPRESA</b> le señale, sin previa autorización de esta; Y por ninguna circunstancia, actividades de carácter personal y ajenas al objeto de este contrato.</li>
+        <li class="font-size2 m2">A comenzar puntualmente al turno asignado, todos los días laborales, salvo que se lo impida una justa causa comprobada, además, de dedicar la totalidad de su jornada de trabajo a cumplir a cabalidad con las funciones establecidas de acuerdo al cargo.</li>
+        <li class="font-size2 m2">Ejecutar por sí mismo las funciones asignadas y cumplir estrictamente las instrucciones, manuales, procesos y procedimientos que le sean dadas por <b>LA EMPRESA</b>, o por quienes la representen, respecto del desarrollo de sus actividades, programando y elaborando diariamente su trabajo de forma eficiente.</li>
+        <li class="font-size2 m2">Si luego de finalizada la tarea de la jornada, aún no ha terminado la jornada de teletrabajo, <b>EL TELETRABAJADOR</b>, prestará sus servicios en las labores que le asigne <b>LA EMPRESA</b> que hagan parte de la labor y en los oficios para los cuales se encuentre apto y capacitado.</li>
+        <li class="font-size2 m2"> A aceptar, los cambios de oficio o de tareas a realizar, dentro de la labor arriba descrita, siempre y cuando, <b>EL TELETRABAJADOR</b> se encuentre en condiciones de desempeñarse en tales oficios.</li>
+        <li class="font-size2 m2">A laborar el tiempo extra y los días festivos o dominicales que sean señalados por <b>LA EMPRESA</b>, cuando por razones técnicas, administrativas o del servicio así se requiera.</li>
+        <li class="font-size2 m2">Se Podrán cambiar en forma permanente o intermitente de día de descanso semanal al sábado, dependiendo de las características del servicio que este prestando <b>EL EMPLEADOR</b>, en cuyo caso se remunerará conforme a lo ordenado por la ley 789 de 2002.</li>
+        <li class="font-size2 m2">A cumplir a cabalidad con los manuales, reglamentos internos, políticas y procedimientos de <b>LA EMPRESA</b>, los cuales declara conocer a la firma de este contrato.</li>
+        <li class="font-size2 m2">A cumplir las normas de seguridad y prevención de accidentes que tenga <b>LA EMPRESA</b>.</li>
+        <li class="font-size2 m2">A participar puntualmente, en las reuniones y capacitaciones programadas por <b>EL EMPLEADOR</b>, en aras de mejorar la formación del <b>TRABAJADOR</b>, la productividad y calidad de la empresa.</li>
+        <li class="font-size2 m2">A conservar y restituir en buen estado, los instrumentos, los insumos, útiles y herramientas, que le haya entregado <b>EL EMPLEADOR</b>, bajo su cuidado y custodia para la ejecución de sus tareas o labores.</li>
+        <li class="font-size2 m2">A conservar completa armonía y comprensión con los clientes, proveedores, autoridades de vigilancia y control, con sus superiores y compañeros de trabajo, en sus relaciones interpersonales y en la ejecución de su labor, preservando el respeto y la cordialidad que debe mantenerse en las relaciones sociales y de trabajo.</li>
+        <li class="font-size2 m2">A Guardar absoluta reserva, salvo autorización expresa de <b>LA EMPRESA</b>, de todas aquellas informaciones que lleguen a su conocimiento, en razón de su trabajo y que sean por naturaleza privadas.</li>
+        <li class="font-size2 m2">A cuidar permanentemente los intereses, instalaciones, muebles y equipos de oficina, de cómputo, enseres, vehículos, maquinaria, herramientas, materias primas, material de empaque y productos elaborados de <b>LA EMPRESA</b>.</li>
+        <li class="font-size2 m2">A cumplir permanentemente, sus labores con espíritu de lealtad, compañerismo, colaboración y disciplina con <b>LA EMPRESA</b>.</li>
+        <li class="font-size2 m2">A Avisar oportunamente y por escrito a <b>LA EMPRESA</b>, todo cambio en su dirección, teléfono o ciudad de residencia.</li>
+    </ul>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PROHIBICIONES DEL TRABAJADOR: </b>Acuerdan las partes las siguientes prohibiciones al <b>TRABAJADOR</b>, además, de las consagradas en la ley y en el reglamento interno de Trabajo:</span>
+</div>
+<div class="row" style="text-align:justify;">
+    <ul>
+        <li class="font-size2 m2">La inejecución de las labores, sin una excusa suficiente que lo justifique, los retrasos reiterados en la iniciación de la jornada de trabajo sin una justa causa que lo amerite, además, de la ejecución de actividades a las propias de su oficio en horas de trabajo, para terceros ya fueren remuneradas o no, o para su provecho personal.</li>
+        <li class="font-size2 m2">Emplear en su trabajo y en el trato con sus compañeros de trabajo, clientes o visitantes un vocabulario soez, descortés, altanero, indecente o poco decoroso.</li>
+        <li class="font-size2 m2">Todo acto de violencia, deslealtad, injuria, actos indecentes o inmorales, malos tratos o grave indisciplina, en que incurra <b>EL TELETRABAJADOR</b> en sus labores contra <b>LA EMPRESA</b>, el personal directivo, sus compañeros de trabajo o sus superiores, clientes o proveedores, por cualquier medio.</li>
+        <li class="font-size2 m2">Dar a las herramientas o equipos de trabajo, un uso o destino contrario a aquel para el cual fueron entregados.</li>
+        <li class="font-size2 m2">Ceder, cambiar, los equipos o herramientas asignados, de los cuales es responsable mientras se encuentran en su poder.</li>
+        <li class="font-size2 m2">Solicitar préstamos especiales o ayuda económica a los compañeros de trabajo, clientes, o proveedores del <b>EMPLEADOR</b>, aprovechándose de su cargo u oficio o en su defecto, aceptarles donaciones de cualquier clase sin la previa autorización escrita del <b>EMPLEADOR</b>.</li>
+        <li class="font-size2 m2">Pedir o recibir dinero de los clientes de <b>LA EMPRESA</b> y darles un destino diferente a estos o no entregarlo en su debida oportunidad, a quien corresponda en la oficina de <b>LA EMPRESA</b> y/o retener dinero o hacer efectivo cheques recibidos para <b>EL EMPLEADOR</b>.</li>
+        <li class="font-size2 m2">Autorizar o ejecutar sin ser de su competencia, operaciones que afecten los intereses del <b>EMPLEADOR</b> o negociar bienes y/o mercancías del <b>EMPLEADOR</b> en provecho propio.</li>
+        <li class="font-size2 m2">Presentar cuentas de gastos ficticios o reportar como cumplidas visitas o tareas no efectuadas.</li>
+        <li class="font-size2 m2">Cualquier actitud en los compromisos comerciales, personales o en las relaciones sociales, que pueda afectar en forma nociva la reputación de <b>EL EMPLEADOR.</b></li>
+        <li class="font-size2 m2">Retirar de las instalaciones donde funcione <b>LA EMPRESA</b> elementos, maquinaria, materia prima y útiles de propiedad del <b>EMPLEADOR</b> sin su autorización escrita.</li>
+    </ul>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>SEXTA</u>. - Equipos informáticos. EL EMPLEADOR</b> proporcionará, instalará y mantendrá en buen estado los equipos informáticos necesarios para el correcto desempeño de las funciones del <b>TELETRABAJADOR</b>. <b>EL TELETRABAJADOR</b> tiene la obligación de cuidado de los equipos suministrados por <b>EL EMPLEADOR</b>, y el uso adecuado y responsable del correo electrónico corporativo y no podrá recolectar o distribuir material ilegal a través de internet, ni darle ningún otro uso que no sea determinado por <b>EL CONTRATO DE TRABAJO</b>. <b>EL TELETRABAJADOR</b> se compromete a cuidar los elementos de trabajo, así como las herramientas que <b>LA EMPRESA</b> ponga a su disposición y a utilizarlas exclusivamente con los fines laborales que previamente se hayan fijado.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO PRIMERO. - </b> Finalizado la modalidad de teletrabajo, el <b>TELETRABAJADOR</b> debe reintegrar los equipos informáticos que se le haya asignado, en el estado en que se le entregaron, salvo el desgaste natural de las cosas.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO SEGUNDO. - EL TELETRABAJADOR</b> podrá hacer uso de elementos propios para el desempeño de sus labores, previo acuerdo con <b>EL EMPLEADOR</b>, respetando la confidencialidad y las demas clausulas y prohibiciones del presente contrato.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>SÉPTIMA</u>. - </b>Se remunerará con un salario básico mensual de '.$valorLetrasTotal.' M/L ($ '.number_format($datos['newSalary'],2).'), pagaderos con una periodicidad '.$datos['newPaymentCicle'].' . Dentro de este pago se encuentra incluida la remuneración de los descansos dominicales y festivos de que tratan los capítulos I y II del título VII del Código Sustantivo del Trabajo.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO PRIMERO. - </b> Las partes hacen constar que en esta remuneración queda incluido el pago de los servicios que <b>EL TELETRABAJADOR</b> se obliga a realizar durante el tiempo estipulado en el presente contrato.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO SEGUNDO. - </b>Si <b>EL TELETRABAJADOR</b> prestare su servicio en día dominical o festivo, sin previa autorización por escrito del <b>EMPLEADOR</b>, no tendrá derecho a reclamar remuneración alguna por este día.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO TERCERO. - EL EMPLEADOR</b> no suministra ninguna clase de salario en especie.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO CUARTO. - </b>Cuando por causa emanada directa o indirectamente de la relación contractual existan obligaciones de tipo económico a cargo del <b>TELETRABAJADOR</b> y a favor del <b>EMPLEADOR</b>, éste procederá a efectuar las deducciones a que hubiere lugar en cualquier tiempo y, más concretamente, a la terminación del presente contrato, así lo autoriza desde ahora <b>EL TELETRABAJADOR</b>, entendiendo expresamente las partes que la presente autorización cumple las condiciones, de orden escrita previa, aplicable para cada caso.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>OCTAVA</u>. - </b>Las partes en el citado contrato, acuerdan expresamente que lo entregado en dinero o en especie por parte del <b>EMPLEADOR</b> al <b>TELETRABAJADOR</b> por concepto de beneficios cualquiera sea su denominación de acuerdo con el artículo 15 de la ley 50 de 1990, no constituyen salario, en especial: los auxilios o contribuciones que otorgue <b>EL EMPLEADOR</b> por concepto de alimentación para <b>EL TELETRABAJADOR</b>, de bonificaciones extraordinarias y demás auxilios otorgados por mera liberalidad del <b>EMPLEADOR</b>.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO PRIMERO. - </b> Cualquier beneficio que se entregue al <b>TELETRABAJADOR</b> sólo se le otorgará como mera liberalidad del <b>EMPLEADOR</b>, por tanto, no constituye salario, ni pago laboral que sea base para el cálculo y pago de prestaciones sociales, aportes parafiscales, a cajas de compensación, <b>SENA</b> o <b>ICBF</b>, entre otros; como tampoco es base para la determinación de las contribuciones o aportes al Sistema de Seguridad Social Integral, tales como: salud, pensión, riesgos profesionales, fondo de solidaridad, etc. Las partes acuerdan desde ahora que en ningún caso los pagos que se entreguen como auxilios o beneficios constituyen salario o son base para las cotizaciones, contribuciones o aportes antes descritos.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>NOVENA</u>. - Costos:</b> Se reconoce al <b>TELETRABAJADOR</b> el valor de $ '.number_format($datos['newPlusSalary'],2).' COP pagaderos con una periodicidad '.$datos['newPaymentCicle'].' como compensación por los gastos de Internet, energía eléctrica, mismos que de ninguna manera (NO) hacen parte del salario.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA</u>. - </b>Todo trabajo suplementario o en horas extras y todo trabajo en día domingo o festivo en los que legalmente debe concederse descanso, se remunerará conforme a la ley, así como los correspondientes recargos nocturnos. Para el reconocimiento y pago del trabajo suplementario, dominical o festivo, <b>EL EMPLEADOR</b> o sus representantes, deben autorizarlo previamente por escrito. Cuando la necesidad de este trabajo se presente de manera imprevista o inaplazable, deberá ejecutarse y darse cuenta de él por escrito, o en forma verbal, a la mayor brevedad al <b>EMPLEADOR</b> o a sus representantes. <b>EL EMPLEADOR</b>, en consecuencia, no reconocerá ningún trabajo suplementario o en días de descanso legalmente obligatorio que no haya sido autorizado previamente o avisado inmediatamente, como queda dicho.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA PRIMERA</u>. - EL TELETRABAJADOR</b> se obliga a laborar la jornada ordinaria en los turnos y dentro de las horas señalados por <b>EL EMPLEADOR</b>, pudiendo hacer éste ajustes o cambios de horario cuando lo estime conveniente. <b>(IUS VARIANDI)</b> Por el acuerdo expreso o tácito de las partes, podrán repartirse las horas de la jornada ordinaria en la forma prevista en el artículo 164 del Código Sustantivo del Trabajo, modificado por el artículo 23 de la Ley 50 de 1990, teniendo en cuenta que los tiempos de descanso entre las secciones de la jornada no se computan dentro de la misma, según el artículo 167 ibídem. Así mismo el <b>EMPLEADOR</b> y el <b>TRABAJADOR</b> podrán acordar que la jornada semanal de cuarenta y ocho (48) horas se realice mediante jornadas diarias flexibles de trabajo, distribuidas en máximo seis (6) días a la semana con un (1) día de descanso obligatorio, que podrá coincidir con el domingo. En éste, el número de horas de trabajo diario podrá repartirse de manera variable durante la respectiva semana y podrá ser de mínimo cuatro (4) horas continuas y hasta diez (10) horas diarias sin lugar a ningún recargo por trabajo suplementario, cuando el número de horas de trabajo no exceda el promedio de cuarenta y ocho (48) horas semanales dentro de la jornada ordinaria de 6 a.m. a 10 p.m.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA SEGUNDA</u>. - Control y supervisión. EL EMPLEADOR</b> controlará y supervisará la actividad del <b>TELETRABAJADOR</b> mediante medios telemáticos, informáticos y electrónicos. Si por motivos de trabajo fuese necesaria la presencia física de representantes de la compañía en el lugar de trabajo de <b>EL TELETRABAJADOR</b> y este fuera su propio domicilio, se hará siempre previa notificación y consentimiento de éste. EL <b>TELETRABAJADOR</b> consiente libremente realizar reuniones a través de videoconferencias con <b>EL EMPLEADOR</b> y que en ningún caso se entiende como violación del domicilio privado.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>Tecnologías que se utilizará para mantener el contacto con el <b>TELETRABAJADOR</b>:</b> '.$datos['newTools'].'.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>Objetivos/ Metas a cumplir por parte del <b>TELETRABAJADOR</b> semanal/mensual:</b> '.$datos['newGoals'].'.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>Disponibilidad/Horas:</b> '.$datos['newHours'].'.</span>
+</div>';
+if (isset($datos['newChecker']) && $datos['newChecker'] != '' && $datos['newChecker'] != null) {
+  $html.='<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>Supervisor:</b> '.mb_strtoupper($datos['newChecker']).'.</span>
+</div>';
+}
+$html.='<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA TERCERA</u>. - Medidas de Seguridad y Previsión de Riesgos en el Teletrabajo. El TELETRABAJADOR</b> autoriza a la <b>ARL</b> y a <b>EL EMPLEADOR</b> visitas periódicas a su domicilio que permitan comprobar si el lugar de trabajo es seguro y está libre de riesgos, de igual forma autoriza las visitas asistencia para actividades de salud ocupacional, con los preavisos descritos en la Cláusula <b>DECIMA SEGUNDA</b>.  No obstante, el <b>TELETRABAJADOR</b>, debe cumplir las condiciones especiales sobre la prevención de riesgos laborales que se encuentran definidas en el Reglamento Interno de Trabajo.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA CUARTA</u>. - Seguridad de la Información.</b> El acceso a los diferentes entornos y sistemas informáticos de <b>EL EMPLEADOR</b> será efectuado siempre y en todo momento bajo el control y la responsabilidad de <b>EL TELETRABAJADOR</b> siguiendo los procedimientos establecidos por <b>LA EMPRESA</b>, los cuales se encuentran definidos en el reglamento interno de trabajo y hace parte integral del presente acuerdo.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA QUINTA</u>. - Protección de datos personales. EL TELETRABAJADOR</b> Ese compromete a respetar la legislación en materia de protección de datos, las políticas de privacidad y de seguridad de la información que la empresa ha implementado, como también a:</span>
+</div>
+<div class="row" style="text-align:justify;">
+    <ul>
+        <li class="font-size2 m2">Utilizar los datos de carácter personal a los que tenga acceso único y exclusivamente para cumplir con sus obligaciones para con <b>LA EMPRESA</b>.</li>
+        <li class="font-size2 m2">Cumplir con las medidas de seguridad que <b>LA EMPRESA</b> haya implementado para asegurar la confidencialidad, secreto e integridad de los datos de carácter personal a los que tenga acceso, así como no a no ceder en ningún caso a terceras personas los datos de carácter personal a los que tenga acceso, ni tan siquiera a efectos de su conservación.</li>
+    </ul>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA SEXTA</u>. - </b>Este contrato es un <b>CONTRATO INDIVIDUAL DE TRABAJO '.mb_strtoupper($datos['newContractType']).'</b>, a partir del día '.$inicio->format('d').' mes '.$mesInicio.' año '.$inicio->format('Y'); 
+  if (isset($fin)) {
+    $html .='y hasta el día '.$fin->format('d').' mes '.$mesFin.' año '.$inicio->format('Y');
+  }
+  $html.=' , permaneciendo este, mientras subsistan las causas que le dieron origen a ese contrato.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARAGRAFO. - </b>Los primeros ('.$diasPrueba.') '.$prueba.' días del presente contrato, se consideran como <b>PERÍODO DE PRUEBA</b> y, por consiguiente, cualquiera de las partes podrá terminar el contrato unilateralmente, en cualquier momento durante dicho período.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA SÉPTIMA</u>. - </b>Son justas causas para dar por terminado unilateralmente este contrato por cualquiera de las partes, las enumeradas en el artículo 7º del Decreto 2351 de 1965; y, además, por parte del <b>EMPLEADOR</b>, las faltas que para el efecto se califiquen como graves contempladas en el reglamento interno de trabajo y en el espacio reservado para cláusulas adicionales en el presente contrato.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA OCTAVA</u>. - Propiedad Intelectual.</b>Los derechos de Propiedad intelectual e industrial que se generen en virtud del presente acuerdo le pertenecen al <b>EMPLEADOR</b>. <b>El TELETRABAJADOR</b> no tendrá las facultades de podrá realizar actividad alguna de uso, reproducción, comercialización, comunicación pública o transformación sobre el resultado de sus funciones, ni tendrá derecho a ejercitar cualquier otro derecho, sin la previa autorización expresa del <b>EMPLEADOR</b>.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA NOVENA</u>. - CLÁUSULA DE CONFIDENCIALIDAD: EL TELETRABAJADOR</b> se obliga y compromete a guardar la absoluta reserva de la información y documentación de la cual llegare a tener conocimiento, en cumplimiento de las funciones para las cuales fue contratado, en especial, no entregará, ni divulgará a terceros, salvo autorización previa y expresa de la Gerencia, información calificada por <b>EL EMPLEADOR</b> como confidencial, reservada o estratégica. No podrá en ninguna circunstancia revelar información a persona natural o jurídica, por ningún medio físico o electrónico, así como a no publicar la información que afecte los intereses de <b>EL EMPLEADOR</b>, durante su permanencia en el cargo, y debido a <b>EL TELETRABAJO</b>, ni después de su retiro, so pena de incurrir en las acciones legales pertinentes consagradas para la protección de esta clase de información.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>VIGÉSIMA</u>. - Disposiciones finales.</b>Este contrato ha sido redactado estrictamente de acuerdo con la ley y la jurisprudencia; será interpretado de buena fe y en consonancia con el Código Sustantivo del Trabajo, cuyo objeto, definido en su artículo 1º, es lograr la justicia en las relaciones entre <b>EMPLEADORES</b> y <b>TRABAJADORES</b> dentro de un espíritu de coordinación económica y equilibrio social.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>VIGÉSIMA PRIMERA</u>. - </b>El presente contrato reemplaza en su integridad y deja sin efecto, cualquier otro contrato verbal o escrito celebrado entre las partes con anterioridad. Las modificaciones que se acuerden al presente contrato, se anotarán a continuación de su texto. Para constancia se firma en dos (2) o más ejemplares del mismo tenor y valor, sin necesidad de testigos, en la ciudad y fecha que se indican a continuación.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>VIGÉSIMA SEGUNDA</u>. - </b>A partir de la presente clausula, solo será válido el parágrafo que advierte del número de copias o ejemplares, la fecha y/o lugar en que se desarrolla el contrato y las correspondientes firmas de las partes, puesto que, todo espacio que aparezca en blanco en el actual documento no puede ser rellenado con ninguna otra clausula o condición, que afecte u obligue a cualquiera de las partes contratantes.</span>
+</div>
+<div class="row m3" style="text-align:justify;">
+    <span class="font-size2">Se firma en la ciudad de '.ucfirst($datos['newContractCity']).', a los '.$hoy->format('d').' días del mes de '.$mes.' del año '.$hoy->format('Y').'.</span>
+</div>
+<br>
+<br>
+</body>
+</html>';
+$footer=
+'<table style="width:100%">
+  <tr>
+  <td class="col-6">
+  <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
+  <span class="font-size2 start"><b>EL EMPLEADOR</b></span><br>';
+  if ($datos['newFirstType']=='PJ') {
+    $footer.='<span class="font-size3 start">'.$datos['newFirstCompany'].'<br>
+      <b>'.$datos['newFirstCompanyIdType'].' No. '.$datos['newFirstCompanyId'].'</span>';
+  }else{
+    $footer.='<span class="font-size3 start">'.$datos['newFirstPart'].'<br>
+      <b>'.$datos['newFirstIdType'].' No. '.$datos['newFirstId'].'</span>';
+  }
+  $footer.='</td>
+  <td class="col-6">
+  <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
+  <span class="font-size2 start"><b>EL TRABAJADOR</b></span><br>
+      <span class="font-size3 start"><b>'.mb_strtoupper($datos['newSecondPart']).'</b><br>
+      <b>'.$datos['newSecondIdType'].' No. '.$datos['newSecondId'].'</span>
+  </td>
+  </tr>
+</table>';
+        $mpdf = new \Mpdf\Mpdf([
+            'default_font' => 'rubik',
+            'mode' => 'utf-8', 
+            'format' => 'Letter',]);;
+        $mpdf->SetDisplayMode('fullpage');
+        $mpdf->shrink_tables_to_fit = 1;
+        $mpdf->defaultheaderfontstyle='';
+        $mpdf->SetHeader('Codigo ludcis.com|'.$_POST['newCode'].'|{PAGENO}');
+        $mpdf->SetProtection(array('print','print-highres'), '', '');
+        $mpdf->WriteHTML($html);
+        $mpdf->AddPage();
+        $mpdf->defaultfooterline = 0;
+        $mpdf->setFooter($footer);
+        $codigo = sha1($document->id);
+        $document->link = 'Views/documents/'.$document->product->code.'/contrato_teletrabajo_'.$codigo.'.pdf';
+        $document->save();
+        $mpdf->Output('Views/documents/'.$document->product->code.'/contrato_teletrabajo_'.$codigo.'.pdf','F');
+        $envio = ControladorGeneral::correo(ucwords($datos['newFirstPart']),$document->email,$document->product->name,$document->link,$hoy->format('d/m/Y'),$document->product->page,$qr,$document->product->pdf);
+        if ($envio=='ok') {
+          $enviado = new ludcis\Mail_log();
+          $enviado->document_id = $document->id;
+          $enviado->email = $document->email;
+          $enviado->save();  
+        }
+        $document->document_state=1;
+        $document->save();
+        unlink($document->link);
+        $mpdf->Output();
+    }
+    public function pdfOtrosiTeletrabajo(){
+        $document = ludcis\Document::where('hash',$_POST['newCode'])->first();
+        setlocale(LC_TIME, 'es_ES');
+        date_default_timezone_set('America/Bogota');
+        $datos = $_POST;
+        $inicio = Carbon::createFromFormat('d/m/Y',$datos['newStartDate']);
+        if (isset($datos['newEndDate'])) {
+          $fin = Carbon::createFromFormat('d/m/Y',$datos['newEndDate']);
+          $mesFin = $this->mesLetras($fin);
+        }
+        if (!is_object($document)) {
+          return redirect('/');        
+        }
+        if ($document->product->value > 0 && $document->payment_state == 0) {
+          return redirect('/');        
+        }
+        if ($document->document_state == 1) {
+          return redirect('/');        
+        }
+        $document->email = $datos['newFirstEmail'];
+        $hoy = Carbon::now();
+        $mes = $this->mesLetras($hoy);
+        $mesInicio = $this->mesLetras($inicio);
+        $valorLetrasTotal = ludcis\NumeroALetras::convertir($datos['newSalary'], 'pesos colombianos', 'centavos');
+        $valorLetrasTotal .=' (COP).';
+        $qr = QrCode::format('png')->size(400)->errorCorrection('H')->color(60,60,59)->generate($document->product->page);
+        $html='<html>
+<head>
+<style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
+* {
+  box-sizing: border-box;
+}
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 100%;
+}
+tr{
+  width:100%;
+}
+td{
+  padding:5px;
+}
+*.backgroung-gray{
+background-color: #f1f2f2;
+}
+.row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+.row {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  margin-right: -7.5px;
+  margin-left: -7.5px;
+    width100%;
+}
+[class*="col-"] {
+  float: left;
+  padding: 15px;
+}
+.font-size{
+  font-size:25px;
+}
+.font-size-2{
+  font-size:16px;
+}
+.font-size-3{
+  font-size:16px;
+}
+.w-100{
+  width:100%;
+}
+.pl{
+  padding-left:5%
+}
+.m1{
+    margin-bottom: 60px;
+    margin-top: 25px;
+}
+.m2{
+    margin-bottom: 15px;
+}
+.m3{
+    margin-bottom: 60px;
+}
+*.col-1 {width: 8.33%;}
+*.col-2 {width: 16.66%;}
+*.col-3 {width: 25%;}
+*.col-4 {width: 33.33%;}
+*.col-5 {width: 41.66%;}
+*.col-6 {width: 50%;}
+*.col-7 {width: 58.33%;}
+*.col-8 {width: 66.66%;}
+*.col-9 {width: 75%;}
+*.col-10 {width: 83.33%;}
+*.col-11 {width: 91.66%;}
+*.col-12 {width: 100%;}
+</style>
+</head> 
+<body><div class="row m1" style="text-align:center;">
+    <span class="font-size"><b>OTRO SÍ MODIFICATORIO DEL CONTRATO DE TRABAJO <b>'.mb_strtoupper($datos['newContractType']).' A MODALIDAD TELETRABAJO</b></span>
+</div>
+    <table style="width:100%" class="m2">';
+      if ($_POST['newLastContract'] != "" && $_POST['newLastContract'] != null) {
+        $html .= '<tr>
+      <td class="col-4">
+          <span class="font-size-2"><b> OTRO SÍ AL CONTRATO No. </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2"><b>'.mb_strtoupper($datos['newLastContract']).'</b></span>
+        </td>
+      </tr>';
+      }
+        if ($datos['newFirstType']=='PJ') {
+          $html.='<tr>
+      <td class="col-4">
+          <span class="font-size-2"><b>Nombre de la empresa: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2"><b>'.mb_strtoupper($datos['newFirstCompany']).'</b></span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Domicilio de la empresa: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.$datos['newFirstAddress'].'</span>
+        </td>
+      </tr>';
+        }
+        $html.='<tr>
+      <td class="col-4">
+          <span class="font-size-2"><b>Nombre del empleador o representate: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2"><b>'.mb_strtoupper($datos['newFirstPart']).'</b></span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Nombre del (la) trabajador (a): </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2"><b>'.mb_strtoupper($datos['newSecondPart']).'</b></span>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>'.$datos['newSecondIdType'].': </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.number_format($datos['newSecondId']).'</span>
+        </td>
+       </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Salario: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">$ '.number_format($datos['newSalary'],2).'</span>
+        </td>
+       </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Periodicidad: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.$datos['newPaymentCicle'].'</span>
+        </td>
+       </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Fecha de iniciación de labores: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.$datos['newStartDate'].'</span>
+        </td>
+       </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Fecha de modificación: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.$hoy->format('d/m/Y').'</span>
+        </td>
+       </tr>
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Objeto del otro sí: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">Modificación a teletrabajo</span>
+        </td>
+       </tr>
+
+      <tr>
+        <td class="col-4">
+          <span class="font-size-2"><b>Ciudad de contratación: </b></span>
+        </td>
+        <td class="col-8" style="text-align:right; background-color:#f1f2f2">
+          <span class="font-size-2">'.$datos['newContractCity'].'</span>
+        </td>
+       </tr>
+       </table>
+       <div class="row m2" style="text-align:justify;">Las partes, que suscribimos el presete <b>OTRO SÍ</b> al <b>CONTRATO DE TRABAJO '.mb_strtoupper($datos['newContractType']).'</b>, lo hacemos fundamentados en la Buena Fe, y en especial en el respeto a los principios del Derecho de Trabajo contenidos en la carta magna de la república de Colombia y la normatividad laboral colombiana.</span>
+</div>
+       <div class="row m2" style="text-align:justify;"><span class="font-size2">Entre los suscritos a saber, por una parte, <b>'.mb_strtoupper($datos['newFirstPart']).'</b>, identificado (a) con '.$datos['newFirstIdType'].' No. <b>'.number_format($datos['newFirstId']).'</b>';
+       if ($datos['newFirstExpedition'] != '' && $datos['newFirstExpedition'] != null) {
+          $html.=' de <b>'.$datos['newFirstExpedition'].'</b>';
+        }
+        $html.=', en mi calidad de <b>EMPLEADOR</b>';
+        if ($datos['newFirstType']=='PJ') {
+           $html.=' en representación de la empresa '.$datos['newFirstCompany'].', Identificada con '.$datos['newFirstCompanyIdType'].' No. '.$datos['newFirstCompanyId'].', con domicilio comercial en la '.$datos['newFirstAddress'].' de la ciudad de '.$datos['newFirstCity'];
+         }
+         $html.=', quien en adelante se denominará <b>EMPLEADOR</b> y por otra parte <b>'.mb_strtoupper($datos['newSecondPart']).'</b>, identificado (a) con <b>'.$datos['newSecondIdType'].' No. '.$datos['newSecondId'].'</b> residente en la ciudad de '.$datos['newSecondCity'].', quien en adelante se denominará <b>TRABAJADOR</b>, hemos convenido de mutuo acuerdo en modificar el presente contrato de trabajo fechado '.$datos['newLastContractDate'].' y celebrado entre las partes <b>EL TRABAJADOR Y EL EMPLEADOR</b>, el cual quedará de la siguiente manera:</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>PRIMERA</u>.';
+  if ($datos['newChargeChange']==1) {
+    $html .= '- MODIFICACIÓN DE CARGO:</b> Se modifica el cargo anterior que <b>EL TRABAJADOR</b> ostenta en la empresa y que se describe en la parte introductoria del contrato. Este será reemplazado por el cargo de <b>'.mb_strtoupper($datos['newCharge']).'</b>.';
+  }else{
+    $html .= '- NO MODIFICACIÓN DE CARGO:</b> Se mantiene el cargo anterior que <b>EL TRABAJADOR</b> ostenta en la empresa y que se describe en la parte introductoria del contrato.';
+  }
+$html .= '</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>SEGUNDA</u>. - </b>Las partes declaran que, en el presente <b>OTRO SÍ</b>, se entienden incorporadas en lo pertinente, las disposiciones legales que regulan las relaciones entre <b>LA EMPRESA</b> y sus <b>TRABAJADORES</b>, en especial, las del contrato de trabajo para el oficio que se suscribe, fuera de las obligaciones consignadas en los reglamentos de trabajo y de higiene y seguridad industrial de la empresa.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>TERCERA</u>. - Lugar de Trabajo.</b>Para efectos del presente acuerdo, <b>EL TRABAJADOR</b> desempeñara las funciones propias de su puesto de trabajo, bajo la modalidad de <b>TELETRABAJO</b>, en la '.$datos['newWorkAddress'].'. En dicho lugar <b>EL TRABAJADOR</b> realizará su trabajo '.$datos['newWeekDays'].' días por semana.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO PRIMERO. - </b> Un día (1) a la semana u ocasionalmente (según lo acordado), <b>EL TELETRABAJADOR</b> deberá presentarse en las instalaciones del <b>EMPLEADOR</b>, para capacitaciones, evaluación de resultados, etc., sin que su presencia en las instalaciones signifique sustitución de <b>EL TELETRABAJO</b> por trabajo presencial.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO SEGUNDO. - </b> En caso de que <b>EL EMPLADOR</b> o <b>EL TELETRABAJADOR</b> quisieran modificar el lugar de trabajo, por trabajo presencial, se deberá acordar de mutuo acuerdo dicha modificación.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>CUARTA</u>. - Espacio de Trabajo. El TELETRABAJADOR</b> deberá realizar sus actividades laborales en el espacio acordado previamente por ÉL, <b>EL EMPLEADOR</b> y la <b>ARL</b>. No podrá ser en otros lugares que no cumplan con las condiciones de seguridad e higiene adecuadas.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>QUINTA</u>. - Derechos del Teletrabajador. El TELETRABAJADOR</b> tendrá derecho a disfrutar de todos los derechos mínimos consagrados en el C.S.T., en especial, los referentes a descansos, vacaciones, prestaciones sociales, afiliación integral a Seguridad Social. Asimismo, <b>EL TELETRABAJADOR</b> tendrá las mismas obligaciones laborales que los demás empleados, las cuales, en relación con la actividad propia de <b>EL EMPLEADO</b>, éste la ejecutará dentro de las siguientes modalidades que implican claras obligaciones para este así:</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>OBLIGACIONES ESPECIALES DEL TRABAJADOR: El TRABAJADOR </b>se obliga especialmente.</span>
+</div>
+<div class="row" style="text-align:justify;">
+    <ul>
+        <li class="font-size2 m2">A laborar la jornada ordinaria en los turnos y dentro de horas que asigne <b>LA EMPRESA</b>, pudiendo esta, ordenar los cambios o ajustes que sean necesarios para el adecuado funcionamiento de las actividades y labores.  Entendiendo que la jornada de trabajo se inicia cuando <b>EL TELETRABAJADOR</b> está listo y disponible en el sitio donde se desarrolla la labor.</li>
+        <li class="font-size2 m2">A no desempeñar labor alguna, ni ejercer otra actividad, fuera de las horas de trabajo al servicio del <b>EMPLEADOR</b>, que pueda afectar o poner en peligro su seguridad, su salud o su descanso.</li>
+        <li class="font-size2 m2">Prestar el servicio para el que fue contratado personalmente, en el lugar del territorio de la Republica de Colombia, que indicare <b>EL EMPLEADOR</b> y excepcionalmente, fuera de dicho territorio cuando las necesidades del servicio así lo requieran.</li>
+        <li class="font-size2 m2">Observar rigurosamente las normas que le fije la empresa para la realización de la labor a que se refiere el presente contrato.</li>
+        <li class="font-size2 m2">A prestar toda la colaboración necesaria en caso de siniestro o de riesgo que afecte o amenace a las personas o a los bienes de <b>LA EMPRESA</b>.</li>
+        <li class="font-size2 m2">A no atender durante las horas de trabajo, asuntos o actividades distintas de las que <b>LA EMPRESA</b> le señale, sin previa autorización de esta; Y por ninguna circunstancia, actividades de carácter personal y ajenas al objeto de este contrato.</li>
+        <li class="font-size2 m2">A comenzar puntualmente al turno asignado, todos los días laborales, salvo que se lo impida una justa causa comprobada, además, de dedicar la totalidad de su jornada de trabajo a cumplir a cabalidad con las funciones establecidas de acuerdo al cargo.</li>
+        <li class="font-size2 m2">Ejecutar por sí mismo las funciones asignadas y cumplir estrictamente las instrucciones, manuales, procesos y procedimientos que le sean dadas por <b>LA EMPRESA</b>, o por quienes la representen, respecto del desarrollo de sus actividades, programando y elaborando diariamente su trabajo de forma eficiente.</li>
+        <li class="font-size2 m2">Si luego de finalizada la tarea de la jornada, aún no ha terminado la jornada de teletrabajo, <b>EL TELETRABAJADOR</b>, prestará sus servicios en las labores que le asigne <b>LA EMPRESA</b> que hagan parte de la labor y en los oficios para los cuales se encuentre apto y capacitado.</li>
+        <li class="font-size2 m2"> A aceptar, los cambios de oficio o de tareas a realizar, dentro de la labor arriba descrita, siempre y cuando, <b>EL TELETRABAJADOR</b> se encuentre en condiciones de desempeñarse en tales oficios.</li>
+        <li class="font-size2 m2">A laborar el tiempo extra y los días festivos o dominicales que sean señalados por <b>LA EMPRESA</b>, cuando por razones técnicas, administrativas o del servicio así se requiera.</li>
+        <li class="font-size2 m2">Se Podrán cambiar en forma permanente o intermitente de día de descanso semanal al sábado, dependiendo de las características del servicio que este prestando <b>EL EMPLEADOR</b>, en cuyo caso se remunerará conforme a lo ordenado por la ley 789 de 2002.</li>
+        <li class="font-size2 m2">A cumplir a cabalidad con los manuales, reglamentos internos, políticas y procedimientos de <b>LA EMPRESA</b>, los cuales declara conocer a la firma de este contrato.</li>
+        <li class="font-size2 m2">A cumplir las normas de seguridad y prevención de accidentes que tenga <b>LA EMPRESA</b>.</li>
+        <li class="font-size2 m2">A participar puntualmente, en las reuniones y capacitaciones programadas por <b>EL EMPLEADOR</b>, en aras de mejorar la formación del <b>TRABAJADOR</b>, la productividad y calidad de la empresa.</li>
+        <li class="font-size2 m2">A conservar y restituir en buen estado, los instrumentos, los insumos, útiles y herramientas, que le haya entregado <b>EL EMPLEADOR</b>, bajo su cuidado y custodia para la ejecución de sus tareas o labores.</li>
+        <li class="font-size2 m2">A conservar completa armonía y comprensión con los clientes, proveedores, autoridades de vigilancia y control, con sus superiores y compañeros de trabajo, en sus relaciones interpersonales y en la ejecución de su labor, preservando el respeto y la cordialidad que debe mantenerse en las relaciones sociales y de trabajo.</li>
+        <li class="font-size2 m2">A Guardar absoluta reserva, salvo autorización expresa de <b>LA EMPRESA</b>, de todas aquellas informaciones que lleguen a su conocimiento, en razón de su trabajo y que sean por naturaleza privadas.</li>
+        <li class="font-size2 m2">A cuidar permanentemente los intereses, instalaciones, muebles y equipos de oficina, de cómputo, enseres, vehículos, maquinaria, herramientas, materias primas, material de empaque y productos elaborados de <b>LA EMPRESA</b>.</li>
+        <li class="font-size2 m2">A cumplir permanentemente, sus labores con espíritu de lealtad, compañerismo, colaboración y disciplina con <b>LA EMPRESA</b>.</li>
+        <li class="font-size2 m2">A Avisar oportunamente y por escrito a <b>LA EMPRESA</b>, todo cambio en su dirección, teléfono o ciudad de residencia.</li>
+        <li class="font-size2 m2"> A Avisar oportunamente y por escrito a <b>LA EMPRESA</b>, todo cambio en su dirección, teléfono o ciudad de residencia.</li>
+    </ul>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PROHIBICIONES DEL TRABAJADOR: </b>Acuerdan las partes las siguientes prohibiciones al <b>TRABAJADOR</b>, además, de las consagradas en la ley y en el reglamento interno de Trabajo:</span>
+</div>
+<div class="row" style="text-align:justify;">
+    <ul>
+        <li class="font-size2 m2">La inejecución de las labores, sin una excusa suficiente que lo justifique, los retrasos reiterados en la iniciación de la jornada de trabajo sin una justa causa que lo amerite, además, de la ejecución de actividades a las propias de su oficio en horas de trabajo, para terceros ya fueren remuneradas o no, o para su provecho personal.</li>
+        <li class="font-size2 m2">Emplear en su trabajo y en el trato con sus compañeros de trabajo, clientes o visitantes un vocabulario soez, descortés, altanero, indecente o poco decoroso.</li>
+        <li class="font-size2 m2">Todo acto de violencia, deslealtad, injuria, actos indecentes o inmorales, malos tratos o grave indisciplina, en que incurra <b>EL TELETRABAJADOR</b> en sus labores contra <b>LA EMPRESA</b>, el personal directivo, sus compañeros de trabajo o sus superiores, clientes o proveedores, por cualquier medio.</li>
+        <li class="font-size2 m2">Dar a las herramientas o equipos de trabajo, un uso o destino contrario a aquel para el cual fueron entregados.</li>
+        <li class="font-size2 m2">Ceder, cambiar, los equipos o herramientas asignados, de los cuales es responsable mientras se encuentran en su poder.</li>
+        <li class="font-size2 m2">Solicitar préstamos especiales o ayuda económica a los compañeros de trabajo, clientes, o proveedores del <b>EMPLEADOR</b>, aprovechándose de su cargo u oficio o en su defecto, aceptarles donaciones de cualquier clase sin la previa autorización escrita del <b>EMPLEADOR</b>.</li>
+        <li class="font-size2 m2">Pedir o recibir dinero de los clientes de <b>LA EMPRESA</b> y darles un destino diferente a estos o no entregarlo en su debida oportunidad, a quien corresponda en la oficina de <b>LA EMPRESA</b> y/o retener dinero o hacer efectivo cheques recibidos para <b>EL EMPLEADOR</b>.</li>
+        <li class="font-size2 m2">Autorizar o ejecutar sin ser de su competencia, operaciones que afecten los intereses del <b>EMPLEADOR</b> o negociar bienes y/o mercancías del <b>EMPLEADOR</b> en provecho propio.</li>
+        <li class="font-size2 m2">Presentar cuentas de gastos ficticios o reportar como cumplidas visitas o tareas no efectuadas.</li>
+        <li class="font-size2 m2">Cualquier actitud en los compromisos comerciales, personales o en las relaciones sociales, que pueda afectar en forma nociva la reputación de <b>EL EMPLEADOR.</b></li>
+        <li class="font-size2 m2">Retirar de las instalaciones donde funcione <b>LA EMPRESA</b> elementos, maquinaria, materia prima y útiles de propiedad del <b>EMPLEADOR</b> sin su autorización escrita.</li>
+    </ul>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>SEXTA</u>. - Equipos informáticos. EL EMPLEADOR</b> proporcionará, instalará y mantendrá en buen estado los equipos informáticos necesarios para el correcto desempeño de las funciones del <b>TELETRABAJADOR</b>. <b>EL TELETRABAJADOR</b> tiene la obligación de cuidado de los equipos suministrados por <b>EL EMPLEADOR</b>, y el uso adecuado y responsable del correo electrónico corporativo y no podrá recolectar o distribuir material ilegal a través de internet, ni darle ningún otro uso que no sea determinado por <b>EL CONTRATO DE TRABAJO</b>. <b>EL TELETRABAJADOR</b> se compromete a cuidar los elementos de trabajo, así como las herramientas que <b>LA EMPRESA</b> ponga a su disposición y a utilizarlas exclusivamente con los fines laborales que previamente se hayan fijado.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO PRIMERO. - </b> Finalizado la modalidad de teletrabajo, el <b>TELETRABAJADOR</b> debe reintegrar los equipos informáticos que se le haya asignado, en el estado en que se le entregaron, salvo el desgaste natural de las cosas.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO SEGUNDO. - EL TELETRABAJADOR</b> podrá hacer uso de elementos propios para el desempeño de sus labores, previo acuerdo con <b>EL EMPLEADOR</b>, respetando la confidencialidad y las demas clausulas y prohibiciones del presente contrato.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>SÉPTIMA</u>. - </b>Como resultado de lo anterior, se modifica la cláusula '.$datos['newLastSalary'].' del contrato de trabajo, misma que habla sobre la remuneración, la cual, quedará de la siguiente manera:<br><b>Calusula '.$datos['newLastSalary'].'</b> - Se remunerará con un salario básico mensual de '.$valorLetrasTotal.' M/L ($ '.number_format($datos['newSalary'],2).'), pagaderos con una periodicidad '.$datos['newPaymentCicle'].' . Dentro de este pago se encuentra incluida la remuneración de los descansos dominicales y festivos de que tratan los capítulos I y II del título VII del Código Sustantivo del Trabajo.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO PRIMERO. - </b> Las partes hacen constar que en esta remuneración queda incluido el pago de los servicios que <b>EL TRABAJADOR</b> se obliga a realizar durante el tiempo estipulado en el presente contrato.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO SEGUNDO. - </b>Si <b>EL TRABAJADOR</b> prestare su servicio en día dominical o festivo, sin previa autorización por escrito del <b>EMPLEADOR</b>, no tendrá derecho a reclamar remuneración alguna por este día.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO TERCERO. - EL EMPLEADOR</b> no suministra ninguna clase de salario en especie.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO CUARTO. - </b>Cuando por causa emanada directa o indirectamente de la relación contractual existan obligaciones de tipo económico a cargo del <b>TRABAJADOR</b> y a favor del <b>EMPLEADOR</b>, éste procederá a efectuar las deducciones a que hubiere lugar en cualquier tiempo y, más concretamente, a la terminación del presente contrato, así lo autoriza desde ahora <b>EL TRABAJADOR</b>, entendiendo expresamente las partes que la presente autorización cumple las condiciones, de orden escrita previa, aplicable para cada caso.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>OCTAVA</u>. - </b>Las partes en el citado contrato, acuerdan expresamente que lo entregado en dinero o en especie por parte del <b>EMPLEADOR</b> al <b>TELETRABAJADOR</b> por concepto de beneficios cualquiera sea su denominación de acuerdo con el artículo 15 de la ley 50 de 1990, no constituyen salario, en especial: los auxilios o contribuciones que otorgue <b>EL EMPLEADOR</b> por concepto de alimentación para <b>EL TELETRABAJADOR</b>, de bonificaciones extraordinarias y demás auxilios otorgados por mera liberalidad del <b>EMPLEADOR</b>.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO PRIMERO. - </b> Cualquier beneficio que se entregue al <b>TELETRABAJADOR</b> sólo se le otorgará como mera liberalidad del <b>EMPLEADOR</b>, por tanto, no constituye salario, ni pago laboral que sea base para el cálculo y pago de prestaciones sociales, aportes parafiscales, a cajas de compensación, <b>SENA</b> o <b>ICBF</b>, entre otros; como tampoco es base para la determinación de las contribuciones o aportes al Sistema de Seguridad Social Integral, tales como: salud, pensión, riesgos profesionales, fondo de solidaridad, etc. Las partes acuerdan desde ahora que en ningún caso los pagos que se entreguen como auxilios o beneficios constituyen salario o son base para las cotizaciones, contribuciones o aportes antes descritos.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>NOVENA</u>. - Costos:</b> Se reconoce al <b>TELETRABAJADOR</b> el valor de $ '.number_format($datos['newPlusSalary'],2).' COP pagaderos con una periodicidad '.$datos['newPaymentCicle'].' como compensación por los gastos de Internet, energía eléctrica, mismos que de ninguna manera <b>(NO)</b> hacen parte del salario.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA</u>. - </b>Todo trabajo suplementario o en horas extras y todo trabajo en día domingo o festivo en los que legalmente debe concederse descanso, se remunerará conforme a la ley, así como los correspondientes recargos nocturnos. Para el reconocimiento y pago del trabajo suplementario, dominical o festivo, <b>EL EMPLEADOR</b> o sus representantes, deben autorizarlo previamente por escrito. Cuando la necesidad de este trabajo se presente de manera imprevista o inaplazable, deberá ejecutarse y darse cuenta de él por escrito, o en forma verbal, a la mayor brevedad al <b>EMPLEADOR</b> o a sus representantes. <b>EL EMPLEADOR</b>, en consecuencia, no reconocerá ningún trabajo suplementario o en días de descanso legalmente obligatorio que no haya sido autorizado previamente o avisado inmediatamente, como queda dicho.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA PRIMERA</u>. - EL TRABAJADOR</b> se obliga a laborar la jornada ordinaria en los turnos y dentro de las horas señalados por <b>EL EMPLEADOR</b>, pudiendo hacer éste ajustes o cambios de horario cuando lo estime conveniente. <b>(IUS VARIANDI)</b> Por el acuerdo expreso o tácito de las partes, podrán repartirse las horas de la jornada ordinaria en la forma prevista en el artículo 164 del Código Sustantivo del Trabajo, modificado por el artículo 23 de la Ley 50 de 1990, teniendo en cuenta que los tiempos de descanso entre las secciones de la jornada no se computan dentro de la misma, según el artículo 167 ibídem. Así mismo el <b>EMPLEADOR</b> y el <b>TRABAJADOR</b> podrán acordar que la jornada semanal de cuarenta y ocho (48) horas se realice mediante jornadas diarias flexibles de trabajo, distribuidas en máximo seis (6) días a la semana con un (1) día de descanso obligatorio, que podrá coincidir con el domingo. En éste, el número de horas de trabajo diario podrá repartirse de manera variable durante la respectiva semana y podrá ser de mínimo cuatro (4) horas continuas y hasta diez (10) horas diarias sin lugar a ningún recargo por trabajo suplementario, cuando el número de horas de trabajo no exceda el promedio de cuarenta y ocho (48) horas semanales dentro de la jornada ordinaria de 6 a.m. a 10 p.m.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA SEGUNDA</u>. - Control y supervisión. EL EMPLEADOR</b> controlará y supervisará la actividad del <b>TELETRABAJADOR</b> mediante medios telemáticos, informáticos y electrónicos. Si por motivos de trabajo fuese necesaria la presencia física de representantes de la compañía en el lugar de trabajo de <b>EL TELETRABAJADOR</b> y este fuera su propio domicilio, se hará siempre previa notificación y consentimiento de éste. EL <b>TELETRABAJADOR</b> consiente libremente realizar reuniones a través de videoconferencias con <b>EL EMPLEADOR</b> y que en ningún caso se entiende como violación del domicilio privado.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>Tecnologías que se utilizará para mantener el contacto con el TELETRABAJADOR:</b> '.$datos['newTools'].'.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>Objetivos/ Metas a cumplir por parte del TELETRABAJADOR semanal/mensual:</b> '.$datos['newGoals'].'.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>Disponibilidad/Horas:</b> '.$datos['newHours'].'.</span>
+</div>';
+if (isset($datos['newChecker']) && $datos['newChecker'] != '' && $datos['newChecker'] != null) {
+  $html.='<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>Supervisor:</b> '.mb_strtoupper($datos['newChecker']).'.</span>
+</div>';
+}
+$html.='<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA TERCERA</u>. - Medidas de Seguridad y Previsión de Riesgos en el Teletrabajo. El TELETRABAJADOR</b> autoriza a la <b>ARL</b> y a <b>EL EMPLEADOR</b> visitas periódicas a su domicilio que permitan comprobar si el lugar de trabajo es seguro y está libre de riesgos, de igual forma autoriza las visitas asistencia para actividades de salud ocupacional, con los preavisos descritos en la Cláusula <b>DECIMA SEGUNDA</b>.  No obstante, el <b>TELETRABAJADOR</b>, debe cumplir las condiciones especiales sobre la prevención de riesgos laborales que se encuentran definidas en el Reglamento Interno de Trabajo.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA CUARTA</u>. - Seguridad de la Información.</b> El acceso a los diferentes entornos y sistemas informáticos de <b>EL EMPLEADOR</b> será efectuado siempre y en todo momento bajo el control y la responsabilidad de <b>EL TELETRABAJADOR</b> siguiendo los procedimientos establecidos por <b>LA EMPRESA</b>, los cuales se encuentran definidos en el reglamento interno de trabajo y hace parte integral del presente acuerdo.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA QUINTA</u>. - Protección de datos personales. EL TELETRABAJADOR</b> Ese compromete a respetar la legislación en materia de protección de datos, las políticas de privacidad y de seguridad de la información que la empresa ha implementado, como también a:</span>
+</div>
+<div class="row" style="text-align:justify;">
+    <ul>
+        <li class="font-size2 m2">Utilizar los datos de carácter personal a los que tenga acceso único y exclusivamente para cumplir con sus obligaciones para con <b>LA EMPRESA</b>.</li>
+        <li class="font-size2 m2">Cumplir con las medidas de seguridad que <b>LA EMPRESA</b> haya implementado para asegurar la confidencialidad, secreto e integridad de los datos de carácter personal a los que tenga acceso, así como no a no ceder en ningún caso a terceras personas los datos de carácter personal a los que tenga acceso, ni tan siquiera a efectos de su conservación.</li>
+    </ul>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA SEXTA</u>. - </b>Las partes acuerdan estipular que, este <b>OTRO SÍ</b>, rige a partir del día '.$inicio->format('d').' mes '.$mesInicio.' año '.$inicio->format('Y'); 
+  if (isset($fin)) {
+    $html .='y hasta el día '.$fin->format('d').' mes '.$mesFin.' año '.$inicio->format('Y');
+  }
+  $html.=' , permaneciendo este, mientras subsistan las causas que le dieron origen a ese contrato.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA SÉPTIMA</u>. - </b>Son justas causas para dar por terminado unilateralmente este contrato por cualquiera de las partes, las enumeradas en el artículo 7º del Decreto 2351 de 1965; y, además, por parte del <b>EMPLEADOR</b>, las faltas que para el efecto se califiquen como graves contempladas en el reglamento interno de trabajo y en el espacio reservado para cláusulas adicionales en el presente contrato.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA OCTAVA</u>. - PROPIEDAD INTELECTUAL.</b>Los derechos de Propiedad intelectual e industrial que se generen en virtud del presente acuerdo le pertenecen al <b>EMPLEADOR</b>. <b>El TELETRABAJADOR</b> no tendrá las facultades de podrá realizar actividad alguna de uso, reproducción, comercialización, comunicación pública o transformación sobre el resultado de sus funciones, ni tendrá derecho a ejercitar cualquier otro derecho, sin la previa autorización expresa del <b>EMPLEADOR</b>.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>DÉCIMA NOVENA</u>. - CLÁUSULA DE CONFIDENCIALIDAD: EL TELETRABAJADOR</b> se obliga y compromete a guardar la absoluta reserva de la información y documentación de la cual llegare a tener conocimiento, en cumplimiento de las funciones para las cuales fue contratado, en especial, no entregará, ni divulgará a terceros, salvo autorización previa y expresa de la Gerencia, información calificada por <b>EL EMPLEADOR</b> como confidencial, reservada o estratégica. No podrá en ninguna circunstancia revelar información a persona natural o jurídica, por ningún medio físico o electrónico, así como a no publicar la información que afecte los intereses de <b>EL EMPLEADOR</b>, durante su permanencia en el cargo, y debido a <b>EL TELETRABAJO</b>, ni después de su retiro, so pena de incurrir en las acciones legales pertinentes consagradas para la protección de esta clase de información.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>VIGÉSIMA</u>. - Disposiciones finales.</b> El presente <b>OTRO SÍ</b>, ha sido redactado estrictamente de acuerdo con la ley y la jurisprudencia; será interpretado de buena fe y en consonancia con el Código Sustantivo del Trabajo, cuyo objeto, definido en su artículo 1º, es lograr la justicia en las relaciones entre <b>EMPLEADORES</b> y <b>TRABAJADORES</b> dentro de un espíritu de coordinación económica y equilibrio social.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b>PARÁGRAFO PRIMERO. - </b> Ambas partes pactan que, las demás cláusulas que no fueron modificadas por el presente <b>OTRO SÍ</b>, se mantienen igual por la vigencia del contrato.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>VIGÉSIMA PRIMERA</u>. - </b>El presente contrato reemplaza en su integridad y deja sin efecto, cualquier otro contrato verbal o escrito celebrado entre las partes con anterioridad. Las modificaciones que se acuerden al presente contrato, se anotarán a continuación de su texto. Para constancia se firma en dos (2) o más ejemplares del mismo tenor y valor, sin necesidad de testigos, en la ciudad y fecha que se indican a continuación.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>VIGÉSIMA SEGUNDA</u>. - </b>El presente <b>OTRO SÍ, NO</b> reemplaza en su totalidad y mucho menos deja sin efecto, cualquier otro contrato verbal o escrito celebrado entre las partes con anterioridad. Solo lo hace en lo concerniente a sus parámetros específicos o las modificaciones que se acuerden en el presente documento, las cuales se han de anotar anterior a este numeral. Las modificaciones que se acuerden al presente, de manera posterior, se realizaran en un nuevo <b>OTRO SÍ.</b></span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2"><b><u>VIGÉSIMA TERCERA</u>. - </b>A partir de la presente clausula, solo será válido el parágrafo que advierte del número de copias o ejemplares, la fecha y/o lugar en que se desarrolla el otro sí y las correspondientes firmas de las partes, puesto que, todo espacio que aparezca en blanco en el actual documento no puede ser rellenado con ninguna otra clausula o condición, que afecte u obligue a cualquiera de las partes contratantes.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">Para constancia se firma en dos (2) o más ejemplares del mismo tenor y valor, sin necesidad de testigos, en la ciudad y fecha que se indican a continuación:</span>
+</div>
+<div class="row m3" style="text-align:justify;">
+    <span class="font-size2">Se firma en la ciudad de '.$datos['newContractCity'].', a los '.$hoy->format('d').' días del mes de '.$mes.' del año '.$hoy->format('Y').'.</span>
+</div>
+<br>
+<br>
+</body>
+</html>';
+$footer=
+'<table style="width:100%">
+  <tr>
+  <td class="col-6">
+  <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
+  <span class="font-size2 start"><b>EL EMPLEADOR</b></span><br>';
+  if ($datos['newFirstType']=='PJ') {
+    $footer.='<span class="font-size3 start">'.$datos['newFirstCompany'].'<br>
+      <b>'.$datos['newFirstCompanyIdType'].'</b> No. <b>'.$datos['newFirstCompanyId'].'</span>';
+  }else{
+    $footer.='<span class="font-size3 start">'.$datos['newFirstPart'].'<br>
+      <b>'.$datos['newFirstIdType'].'</b> No. <b>'.$datos['newFirstId'].'</span>';
+  }
+  $footer.='</td>
+  <td class="col-6">
+  <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
+  <span class="font-size2 start"><b>EL TRABAJADOR</b></span><br>
+      <span class="font-size3 start"><b>'.mb_strtoupper($datos['newSecondPart']).'</b><br>
+      <b>'.$datos['newSecondIdType'].'</b> No. <b>'.$datos['newSecondId'].'</span>
+  </td>
+  </tr>
+</table>';
+        $mpdf = new \Mpdf\Mpdf([
+            'default_font' => 'rubik',
+            'mode' => 'utf-8', 
+            'format' => 'Letter',]);;
+        $mpdf->SetDisplayMode('fullpage');
+        $mpdf->shrink_tables_to_fit = 1;
+        $mpdf->defaultheaderfontstyle='';
+        $mpdf->SetHeader('Codigo ludcis.com|'.$_POST['newCode'].'|{PAGENO}');
+        $mpdf->SetProtection(array('print','print-highres'), '', '');
+        $mpdf->WriteHTML($html);
+        $mpdf->AddPage();
+        $mpdf->defaultfooterline = 0;
+        $mpdf->setFooter($footer);
+        $codigo = sha1($document->id);
+        $document->link = 'Views/documents/'.$document->product->code.'/otrosi_teletrabajo_'.$codigo.'.pdf';
+        $document->save();
+        $mpdf->Output('Views/documents/'.$document->product->code.'/otrosi_teletrabajo_'.$codigo.'.pdf','F');
         $envio = ControladorGeneral::correo(ucwords($datos['newFirstPart']),$document->email,$document->product->name,$document->link,$hoy->format('d/m/Y'),$document->product->page,$qr,$document->product->pdf);
         if ($envio=='ok') {
           $enviado = new ludcis\Mail_log();
@@ -3455,7 +4757,15 @@ background-color: #666666;
 <body><div class="row m1" style="text-align:center;">
     <span class="font-size"><b>CONTRATO DE COMPRAVENTA DE VEHÍCULO AUTOMOTOR</b></span>
 </div>
-       <div class="row m2" style="text-align:justify;"><span class="font-size2">Entre los suscritos <b>'.mb_strtoupper($datos['newSeller']).'</b>, mayor de edad, vecino de '.$datos['newSellerCity'].', identificado (a) con '.$datos['newSellerIdType'].' número '.$datos['newSellerId'].' expedida en <b>'.$datos['newSellerExpedition'].'</b>, quien en adelante se denominará <b>EL VENDEDOR</b>, de una parte, y <b>'.mb_strtoupper($datos['newBuyer']).'</b> también mayor de edad, vecino de '.$datos['newBuyerCity'].', identificado (a) con '.$datos['newBuyerIdType'].' número '.$datos['newBuyerId'].' expedida en <b>'.$datos['newBuyerExpedition'].'</b>, quien para efectos del presente instrumento se designará como <b>EL COMPRADOR</b>, de otra parte, manifestamos que hemos convenido celebrar el presente <b>CONTRATO DE COMPRAVENTA DE VEHÍCULO AUTOMOTOR</b> que se regirá por las cláusulas que a continuación se señalan.</span>
+       <div class="row m2" style="text-align:justify;"><span class="font-size2">Entre los suscritos <b>'.mb_strtoupper($datos['newSeller']).'</b>, mayor de edad, vecino de '.$datos['newSellerCity'].', identificado (a) con '.$datos['newSellerIdType'].' número '.$datos['newSellerId'];
+       if (isset($datos['newSellerExpedition']) && $datos['newSellerExpedition'] != '' && $datos['newSellerExpedition'] != null) {
+          $html.=' expedida en <b>'.$datos['newSellerExpedition'].'</b>';
+        }
+        $html.=', quien en adelante se denominará <b>EL VENDEDOR</b>, de una parte, y <b>'.mb_strtoupper($datos['newBuyer']).'</b> también mayor de edad, vecino de '.$datos['newBuyerCity'].', identificado (a) con '.$datos['newBuyerIdType'].' número '.$datos['newBuyerId'];
+        if (isset($datos['newBuyerExpedition']) && $datos['newBuyerExpedition'] != '' && $datos['newBuyerExpedition'] != null) {
+           $html.=' expedida en <b>'.$datos['newBuyerExpedition'].'</b>';
+         }
+         $html.=', quien para efectos del presente instrumento se designará como <b>EL COMPRADOR</b>, de otra parte, manifestamos que hemos convenido celebrar el presente <b>CONTRATO DE COMPRAVENTA DE VEHÍCULO AUTOMOTOR</b> que se regirá por las cláusulas que a continuación se señalan.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
   <span class="font-size2"><b>PRIMERA: EL VENDEDOR</b> transfiere a título e venta a favor de <b>EL COMPRADOR</b> y éste mismo recibe en los términos y condiciones que aquí se determinan el <b>VEHÍCULO AUTOMOTOR</b>:</span>
@@ -3554,7 +4864,7 @@ background-color: #666666;
           <span class="font-size-2"><b>CAPACIDAD: </b></span>
         </td>
         <td class="col-8" style="text-align:right; background-color:#bfbfbf">
-          <span class="font-size-2"><b>'.mb_strtoupper($datos['newCapacity']).'</b></span>
+          <span class="font-size-2"><b>'.mb_strtoupper($datos['newCapacity']).' '.mb_strtoupper($datos['newCapacityType']).'</b></span>
         </td>
        </tr>
        </table>
@@ -3650,6 +4960,7 @@ $footer=
         $mpdf->SetHeader('Codigo ludcis.com|'.$_POST['newCode'].'|{PAGENO}');
         $mpdf->SetProtection(array('print','print-highres'), '', '');
         $mpdf->WriteHTML($html);
+        $mpdf->AddPage();
         $mpdf->defaultfooterline = 0;
         $mpdf->setFooter($footer);
         $codigo = sha1($document->id);
@@ -3673,7 +4984,7 @@ $footer=
         if (!is_object($document)) {
           return redirect('/');        
         }
-        if ($document->product->value > 0 && $document->payment_state = 0) {
+        if ($document->product->value > 0 && $document->payment_state == 0) {
           return redirect('/');        
         }
         if ($document->document_state == 1) {
@@ -3760,7 +5071,7 @@ background-color: #666666;
 </head>
 <body>
 <div class="row m1">
-  <span class="font-size2">'.$datos['newDocumentCity'].', '.$hoy->format('d').' de '.$mes.' de '.$hoy->format('Y').'.</span>
+  <span class="font-size2">'.ucfirst($datos['newDocumentCity']).', '.$hoy->format('d').' de '.$mes.' de '.$hoy->format('Y').'.</span>
 </div>
 <div class="row m2">
   <span class="font-size2">';
@@ -3790,7 +5101,7 @@ $html .= '<br>
       }else{
         $html .='Señores ';
       }
-$html .= mb_strtoupper($datos['newDebtor']).'</b>, identificado (a) con <b>'.$datos['newDebtorIdType'].' Nro. '.$datos['newDebtorId'].'</b> nos dirigimos a usted con el fin de comunicarle que, sus obligaciones originadas de'.$datos['newContract'].' '.strtolower($datos['newContractType']).'</b> con '.$datos['newCreditorClass'].' <b>'.mb_strtoupper($datos['newCreditor']).'</b> se encuentran en mora, no obstante, el tiempo transcurrido y pese a las diversas gestiones realizadas de nuestra parte, aun dicha obligación continúa en el mismo estado; por lo anterior, le requerimos muy comedidamente que de manera inmediata realice el pago correspondiente al valor total de la obligación o en su defecto, se acerque a nosotros a realizar un arreglo.</span>
+$html .='<b>'.mb_strtoupper($datos['newDebtor']).'</b>, identificado (a) con <b>'.$datos['newDebtorIdType'].' Nro. '.number_format($datos['newDebtorId']).'</b> nos dirigimos a usted con el fin de comunicarle que, sus obligaciones originadas de'.$datos['newContract'].' '.strtolower($datos['newContractType']).'</b> con '.$datos['newCreditorClass'].' <b>'.mb_strtoupper($datos['newCreditor']).'</b> se encuentran en mora, no obstante, el tiempo transcurrido y pese a las diversas gestiones realizadas de nuestra parte, aun dicha obligación continúa en el mismo estado; por lo anterior, le requerimos muy comedidamente que de manera inmediata realice el pago correspondiente al valor total de la obligación o en su defecto, se acerque a nosotros a realizar un arreglo.</span>
 </div>
 <div class="row m2" style="text-align:justify;">
   <span class="font-size2">Tomando en cuenta la renuencia de su parte a una justa negociación, se impulsará el Cobro Jurídico en su contra, recuerde que todos los gastos de horarios derivados del proceso jurídico, sumado a las costas procesales que correspondan al proceso, corren a su cargo y serán incluidos dentro del monto a Cancelar.</span>
@@ -3801,8 +5112,8 @@ $html .= mb_strtoupper($datos['newDebtor']).'</b>, identificado (a) con <b>'.$da
 <table>
   <tr>
     <td>
-      <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
-      <span class="font-size2 m4"><b>Atentamente,</b></span><br>';
+      <span class="font-size2 m4"><b>Atentamente</b></span><br>
+      <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>';
       if ($datos['newCreditorClass'] == 'la copropiedad' || $datos['newCreditorClass'] == 'el conjunto residencial'|| $datos['newCreditorClass'] == 'la empresa') {
         $html .='
       <span class="font-size3"><b>'.mb_strtoupper($datos['newAgent']).'</b><br>
@@ -3810,7 +5121,7 @@ $html .= mb_strtoupper($datos['newDebtor']).'</b>, identificado (a) con <b>'.$da
       }
 $html .= '
       <span class="font-size3"><b>'.mb_strtoupper($datos['newCreditor']).'</b><br>
-      <b>'.$datos['newCreditorIdType'].'</b> No. <b>'.$datos['newCreditorId'].'<br>
+      <b>'.$datos['newCreditorIdType'].' No. '.number_format($datos['newCreditorId']).'</b><br>
       Domiciliado en '.$datos['newCreditorCity'].' en la '.$datos['newCreditorAddress'].'<br>
       Teléfono: '.$datos['newCreditorPhone'].'</span>
     </td>
@@ -3864,8 +5175,9 @@ $footer='<div class="row" style="text-align:center;">
         if (is_object($codigoDescuento)) {
           if ($codigoDescuento->porcentual=='1') {
             $descuento = $valor * $codigoDescuento->amount /100;
+            $descuento = $descuento / 1.19;
           }else{
-            $descuento=$codigoDescuento->amount;
+            $descuento=$codigoDescuento->amount/1.19;
           }
         }else{
           $descuento = 0;
@@ -4111,7 +5423,279 @@ border: 1px solid black
         $bill->pdf = 'Views/bills/factura_'.$numeroFactura.'.pdf';
         $bill->save();
         $mpdf->Output('Views/bills/factura_'.$numeroFactura.'.pdf','F');
-        $envio = ControladorGeneral::correoFactura(mb_strtoupper($nombreCliente),$bill->email,'Views/bills/factura_'.$numeroFactura.'.pdf',$hoy->format('d/m/Y'),$bill->document->hash,$qr);
+        $envio = ControladorGeneral::correoFactura(ucfirst($nombreCliente),$bill->email,$bill->pdf,$hoy->format('d/m/Y'),$bill->document->hash,$qr);
         unlink($bill->pdf);
+    }
+    public static function pdfInformeFacturas($date1,$date2){
+        setlocale(LC_TIME, 'es_ES');
+        date_default_timezone_set('America/Bogota');
+        $date1=Carbon::createFromFormat('d-m-Y',$date1);
+        $date2=Carbon::createFromFormat('d-m-Y',$date2);
+        $bills = ludcis\Bill::whereNotNull('number')->where('number','!=','')->whereBetween('created_at',[$date1,$date2])->get();
+          $mpdf = new \Mpdf\Mpdf([
+              'default_font' => 'rubik',
+              'mode' => 'utf-8', 
+              'format' => 'Letter',
+              'margin_left' => 10,     // 15 margin_left
+              'margin_right' => 10,
+              'margin_header' => 10,     // 9 margin header
+              'margin_footer' => 10,]);
+          $mpdf->SetDisplayMode('fullpage');
+          $mpdf->shrink_tables_to_fit = 1;
+          $mpdf->defaultfooterline = 0;
+          $first = true;
+        foreach ($bills as $bill) {
+          if ($first == true) {
+            $first = 0;
+          }else{
+            $mpdf->AddPage();
+          }
+          $numeroFactura = $bill->number;
+          $nombreCliente = $bill->name;
+          $tipoDocumento = $bill->id_type;
+          $documento = $bill->id_number;
+          $code = $bill->document->product->code;
+          $producto = $bill->document->product->name;
+          $email = $bill->email;
+          $valor = $bill->document->product->value/1.19;
+          $codigoDescuento = ludcis\Code::where('code',$bill->code)->first();
+          if (is_object($codigoDescuento)) {
+            if ($codigoDescuento->porcentual=='1') {
+              $descuento = $valor * $codigoDescuento->amount /100;
+              $descuento = $descuento / 1.19;
+            }else{
+              $descuento=$codigoDescuento->amount/1.19;
+            }
+          }else{
+            $descuento = 0;
+          }
+          $neto = $bill->base;
+          $iva = $bill->tax;
+          $total = $bill->total;
+          $hoy = Carbon::parse($bill->created_at);
+          $valorLetras = ludcis\NumeroALetras::convertir($total, 'pesos colombianos', 'centavos');
+          $resolution = $bill->resolution;
+          $numeroRes = $resolution->res_number;
+          $minRes = $resolution->start_number;
+          $maxRes = $resolution->end_number;
+          $fechaRes = $resolution->res_expedition;
+          $html='<html>
+  <head>
+  <style>
+  body{
+    background: url("/Views/img/plantilla/AF_FONDO.jpg");
+    background-image-resize:6;
+    background-repeat: no-repeat;
+    background-position: center;
+    font-size: 12px;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 100%;
+  }
+  td{
+    padding:5px;
+  }
+  *.backgroung-gray{
+  background-color: #56b688;
+  }
+  .row::after {
+    content: "";
+    clear: both;
+    display: table;
+  }
+  .row {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    margin-right: -7.5px;
+    margin-left: -7.5px;
+      width100%;
+  }
+  [class*="col-"] {
+    float: left;
+    padding: 15px;
+  }
+  *.col-1 {width: 8.33%;}
+  *.col-2 {width: 16.66%;}
+  *.col-3 {width: 25%;}
+  *.col-4 {width: 33.33%;}
+  *.col-5 {width: 41.66%;}
+  *.col-6 {width: 50%;}
+  *.col-7 {width: 58.33%;}
+  *.col-8 {width: 66.66%;}
+  *.col-9 {width: 75%;}
+  *.col-10 {width: 83.33%;}
+  *.col-11 {width: 91.66%;}
+  *.col-12 {width: 100%;}
+  .center {
+    text-align: center important!;
+  }
+  .end {
+    text-align: end;
+  }
+  .start {
+    text-align: start;
+  }
+  tr{
+    width:100%;
+  }
+  .border-gray{
+  border: 1px solid gray
+  }
+  td.backgroung-gray{
+  border: 1px solid black; 
+  background-color: #56b688
+  }
+  .border-black{
+  border: 1px solid black
+  }
+  .color-black{
+  color: #000
+  }
+  .color-gray{
+  color: #808080
+  }
+  .border-black{
+  border: 1px solid black
+  }
+  .font-size{
+    font-size:15px;
+  }
+  .font-size-2{
+    font-size:13px;
+  }
+  .font-size-3{
+    font-size:11px;
+  }
+  .font-size-4{
+    font-size:10px;
+  }
+  .font-size-5{
+    font-size:10px;
+  }
+  .w-100{
+    width:100%;
+  }
+  .pl{
+    padding-left:5%
+  }
+  </style>
+  </head>
+  <body>
+  <table class="w-100" style="padding-top:50px">
+        <tr>
+          <td class="col-12" style="text-align: right">
+            <span class="font-size-2 color-black">Ludcis S.A.S.<br><span class="color-gray">NIT: 901.323.761-1<br>Teléfono: 302 323 3242<br>soporte@ludcis.com<br>Régimen Común</span></span>
+          </td>
+        </tr>
+  </table>
+      <table class="w-100" style="padding-top:25px">
+        <tr>
+          <td class="col-12" style="text-align: right">
+            <span class="font-size color-black"><b>FACTURA DE VENTA: '.$numeroFactura.'</b></span>
+          </td>
+        </tr>
+        </table>
+        <table class="w-100">   
+        <tr>
+          <td class="col-2" style="text-align:right; width: 16.67%">
+            <span class="color-gray"><b>Cliente:<br>'.$tipoDocumento.':<br>e-mail:<br>Fecha:</b></span>
+          </td>  
+          <td class="col-10">
+            <span class="color-gray">'.mb_strtoupper($nombreCliente).'<br>'.$documento.'<br>'.$email.'<br>'.$hoy->format('d/m/y').'</span>
+          </td>
+        </tr>
+      </table>
+      <table class="w-100" style="padding-top:40px">
+        <tr>
+          <td style="text-align: center; border-bottom: 3px solid black; width: 15%" class="col-2"><b class="font-size-2">Ítem</span></td>
+          <td style="text-align: center; border-bottom: 3px solid black; width: 40%" class="col-4"><b class="font-size-2">Descripción</span></td>
+          <td style="text-align: center; border-bottom: 3px solid black; width: 15%" class="col-2"><b class="font-size-2">Cantidad</span></td>
+          <td style="text-align: center; border-bottom: 3px solid black; width: 15%" class="col-2"><b class="font-size-2">Valor</span></td>
+          <td style="text-align: center; border-bottom: 3px solid black; width: 15%" class="col-2"><b class="font-size-2">Valor Total</span></td>
+        </tr>
+        <tr>
+          <td style="text-align: center" class="col-2"><span>'.$code.'</span></td>
+          <td style="text-align: left" class="col-4"><span>'.ucfirst($producto).'</span></td>
+          <td style="text-align: center" class="col-2"><span>1</span></td>
+          <td style="text-align: right" class="col-2"><span>$ '.number_format($valor,2).'</span></td>
+          <td style="text-align: right" class="col-2"><span>$ '.number_format($valor,2).'</span></td>
+        </tr>
+        <tr>
+          <td style="text-align: right;" class="col-2"><span class="font-size-3"></span></td>
+          <td style="text-align: right;" class="col-4"><span class="font-size-3"></span></td>
+          <td style="text-align: right;" class="col-2"><span class="font-size-3"></span></td>
+          <td style="text-align: left;" class="col-2"><span class="font-size-3"></span></td>
+          <td style="text-align: right;" class="col-2"><span class="font-size-3"></span></td>
+        </tr>
+        <tr>
+          <td style="text-align: right;padding-top:185px" class="col-2"><span class="font-size-3"></span></td>
+          <td style="text-align: right;padding-top:185px" class="col-4"><span class="font-size-3"></span></td>
+          <td style="text-align: right;padding-top:185px" class="col-2"><span class="font-size-3"></span></td>
+          <td style="text-align: left;padding-top:185px" class="col-2"><span class="font-size-3"></span></td>
+          <td style="text-align: right;padding-top:185px" class="col-2"><span class="font-size-3"></span></td>
+        </tr>
+        <tr>
+          <td style="text-align: right; border-bottom: 3px solid black" class="col-2"><span class="font-size-3"></span></td>
+          <td style="text-align: right; border-bottom: 3px solid black" class="col-4"><span class="font-size-3"></span></td>
+          <td style="text-align: right; border-bottom: 3px solid black" class="col-2"><span class="font-size-3"></span></td>
+          <td style="text-align: left; border-bottom: 3px solid black" class="col-2"><span class="font-size-3"></span></td>
+          <td style="text-align: right; border-bottom: 3px solid black" class="col-2"><span class="font-size-3"></span></td>
+        </tr>
+        <tr>
+          <td style="text-align: right;" class="col-2"><span class="font-size-3"></span></td>
+          <td style="text-align: right;" class="col-4"><span class="font-size-3"></span></td>
+          <td style="text-align: right;" class="col-2"><span class="font-size-3"></span></td>
+          <td style="text-align: right" class="col-2"><span class="font-size-3">Subtotal:</span></td>
+          <td style="text-align: right" class="col-2"><span>$ '.number_format($valor,2).'</span></td>
+        </tr>
+        <tr>
+          <td style="text-align: right;" class="col-2"><span class="font-size-3"></span></td>
+          <td style="text-align: right;" class="col-4"><span class="font-size-3"></span></td>
+          <td style="text-align: right;" class="col-2"><span class="font-size-3"></span></td>
+          <td style="text-align: right" class="col-2"><span class="font-size-3">Descuento:</span></td>
+          <td style="text-align: right" class="col-2"><span>$ '.number_format($descuento,2).'</span></td>
+        </tr>
+        <tr>
+          <td style="text-align: right;" class="col-2"><span class="font-size-3"></span></td>
+          <td style="text-align: right;" class="col-4"><span class="font-size-3"></span></td>
+          <td style="text-align: right;" class="col-2"><span class="font-size-3"></span></td>
+          <td style="text-align: right" class="col-2"><span class="font-size-3">Neto:</span></td>
+          <td style="text-align: right" class="col-2"><span>$ '.number_format($neto,2).'</span></td>
+        </tr>
+        <tr>
+          <td style="text-align: center;" class="col-10" colspan="3" rowspan="4"><span class="font-size-5 color-gray">'.mb_strtoupper('Representación de factura en papel Resolución DIAN '.$numeroRes.' numeración autorizada de '.$minRes.' a '.$maxRes.' de '.$fechaRes.'. Esta factura es informativa, generada únicamente para fines tributarios.', 'UTF-8').'</span></td>
+          <td style="text-align: right" class="col-2"><span class="font-size-3">IVA:</span></td>
+          <td style="text-align: right" class="col-2"><span>$ '.number_format($iva,2).'</span></td>
+        </tr>
+        <tr>
+          <td style="text-align: right" class="col-2"><span class="font-size-3">Retefuente:</span></td>
+          <td style="text-align: right" class="col-2"><span>$ 0.00</span></td>
+        </tr>
+        <tr>
+          <td style="text-align: right" class="col-2"><span class="font-size-3">ReteIVA:</span></td>
+          <td style="text-align: right" class="col-2"><span>$ 0.00</span></td>
+        </tr>
+        <tr>
+          <td style="text-align: right" class="col-2"><span class="font-size-3">ReteICA:</span></td>
+          <td style="text-align: right" class="col-2"><span>$ 0.00</span></td>
+        </tr>
+        <tr>
+          <td style="text-align: right;" class="col-2"><b>SON:</b><span class="color-black"></span></td>
+          <td style="text-align: left;" class="col-6" colspan="2">'.ucfirst(strtolower($valorLetras)).' (COP).<span class="color-black font-size-3"></span></td>
+          <td style="text-align: right" class="col-2"><span><b>Valor Total:</b></span></td>
+          <td style="text-align: right" class="col-2"><span class="font-size-2">$ '.number_format($total,2).'</span></td>
+        </tr>
+      </table>';
+          $mpdf->WriteHTML($html);
+      } 
+        $mpdf->Output();
     }
 }

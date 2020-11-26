@@ -10,7 +10,7 @@ $("#tipo-cuotas").on("change",function(){
   case 'Personalizado':
     $("#info-cuotas").append(
       '<div class="row">' +
-        '<div class="form-group ml-3" style="width:47.5%">' +
+        '<div class="form-group col-12 col-sm-6">' +
           '<div class="input-group mb-3">' +
             '<div class="input-group-prepend d-md-inline-flex">' +
               '<span class="input-group-text"><i class="fas fa-hashtag"></i></span>' +
@@ -18,16 +18,16 @@ $("#tipo-cuotas").on("change",function(){
             '<input id="cuotas-pago" type="number" class="form-control" step="1" min="1" max="60"  name="newFeesNumber" placeholder="Número de cuotas" required>' +
           '</div>' +
        '</div>' +
-        '<div class="form-group ml-3" style="width:47.5%">' +
+        '<div class="form-group col-12 col-sm-6">' +
           '<div class="input-group mb-3">' +
             '<div class="input-group-prepend d-md-inline-flex">' +
               '<span class="input-group-text"><i class="fas fa-calculator"></i></span>' +
             '</div>' +
             '<select name="newFeesMix" class="form-control" required>'+
                       '<option value="">¿Qué paga en las cuotas?</option>'+
-                      '<option value="Interés">Interés</option>'+
-                      '<option value="Capital">Capital</option>'+
-                      '<option value="Capital e interés">Capital e interés</option>'+
+                      '<option value="intereses">Interés</option>'+
+                      '<option value="capital">Capital</option>'+
+                      '<option value="capital e intereses">Capital e interés</option>'+
             '</select>' +
           '</div>' +
        '</div>' +
@@ -41,23 +41,23 @@ $("#tipo-cuotas").on("change",function(){
   default:
     $("#info-cuotas").append(
       '<div class="row">' +
-        '<div class="form-group ml-3" style="width:96.5%">' +
+        '<div class="form-group col-12">' +
           '<div class="input-group mb-3">' +
             '<div class="input-group-prepend d-md-inline-flex">' +
               '<span class="input-group-text"><i class="fas fa-calculator"></i></span>' +
             '</div>' +
             '<select name="newFeesMix" class="form-control" required>'+
                       '<option value="">¿Qué paga en las cuotas?</option>'+
-                      '<option value="Interés">Interés</option>'+
-                      '<option value="Capital">Capital</option>'+
-                      '<option value="Capital e interés">Capital e interés</option>'+
+                      '<option value="intereses">Interés</option>'+
+                      '<option value="capital">Capital</option>'+
+                      '<option value="capital e intereses">Capital e interés</option>'+
             '</select>' +
           '</div>' +
        '</div>' +
      '</div>'
             );
     $("#fechas-pago").append(
-       '<div class="form-group ml-3" style="width:96.5%">' +
+       '<div class="form-group col-12">' +
         '<div class="input-group mb-3">' +
             '<div class="input-group-prepend d-md-inline-flex">' +
             '<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>' +
@@ -76,7 +76,7 @@ $("#info-cuotas").on("change","#cuotas-pago",function(){
   var cuotas = $(this).val();
   for (var i = 1; i <= cuotas; i++) {
     $("#fechas-pago").append(
-       '<div class="form-group ml-3" style="width:47.5%">' +
+       '<div class="form-group col-12 col-sm-6">' +
         '<div class="input-group mb-3">' +
             '<div class="input-group-prepend d-md-inline-flex">' +
             '<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>' +
@@ -97,7 +97,7 @@ $("#tipo-pago").on("change",function(){
   case 'Deposito':
     $("#cuenta-pago").append(
       '<div class="row">' +
-        '<div class="form-group ml-3" style="width:47.5%">' +
+        '<div class="form-group col-12 col-sm-6">' +
           '<div class="input-group mb-3">' +
             '<div class="input-group-prepend d-md-inline-flex">' +
               '<span class="input-group-text"><i class="fas fa-wallet"></i></span>' +
@@ -110,17 +110,17 @@ $("#tipo-pago").on("change",function(){
             '</select>' +
           '</div>' +
        '</div>' +
-       '<div class="form-group ml-3" style="width:47.5%">' +
+       '<div class="form-group col-12 col-sm-6">' +
         '<div class="input-group mb-3">' +
             '<div class="input-group-prepend d-md-inline-flex">' +
             '<span class="input-group-text"><i class="fas fa-university"></i></span>' +
             '</div>' +
-            '<input type="text" class="form-control" name="newPaymentBank" placeholder="nombre del Banco" required>' +
+            '<input type="text" class="form-control" name="newPaymentBank" placeholder="Nombre del Banco" required>' +
           '</div>' +
        '</div>' +
      '</div>' +
       '<div class="row">' +
-       '<div class="form-group ml-3" style="width:96.5%">' +
+       '<div class="form-group col-12">' +
         '<div class="input-group mb-3">' +
             '<div class="input-group-prepend d-md-inline-flex">' +
             '<span class="input-group-text"><i class="fas fa-hashtag"></i></span>' +

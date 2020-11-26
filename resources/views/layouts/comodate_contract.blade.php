@@ -41,7 +41,7 @@
               </div>
             </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fa fa-user"></i></span>
@@ -52,7 +52,7 @@
             </div>
             <!-- Documento -->
             <div class="row">
-              <div class="form-group ml-3" style="width:32%">
+              <div class="form-group col-12 col-sm-4">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-id-card"></i></span>
@@ -65,7 +65,7 @@
                     </select>
                   </div>
                </div>
-               <div class="form-group ml-3" style="width:63%">
+               <div class="form-group col-12 col-sm-8">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
@@ -76,7 +76,7 @@
              </div>
              <div class="row">
             <!-- Residencia -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-home"></i></span>
@@ -85,12 +85,12 @@
                   </div>
                </div>
             <!-- Expedicion -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                     </div>
-                    <input title="Ciudad donde se expidió el documento del comodante" type="text" class="form-control" name="newComodanteExpedition" placeholder="Ciudad de expedición" required>
+                    <input title="Ciudad donde se expidió el documento del comodante" type="text" class="form-control" name="newComodanteExpedition" placeholder="Ciudad de expedición (Opcional)">
                   </div>
                </div>
              </div>
@@ -100,7 +100,7 @@
                   </div>
             </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fa fa-user"></i></span>
@@ -111,7 +111,7 @@
             </div>
             <!-- Documento -->
             <div class="row">
-              <div class="form-group ml-3" style="width:32%">
+              <div class="form-group col-12 col-sm-4">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-id-card"></i></span>
@@ -124,7 +124,7 @@
                     </select>
                   </div>
                </div>
-               <div class="form-group ml-3" style="width:63%">
+               <div class="form-group col-12 col-sm-8">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
@@ -135,7 +135,7 @@
              </div>
              <div class="row">
             <!-- Residencia -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-home"></i></span>
@@ -144,12 +144,12 @@
                   </div>
                </div>
             <!-- Expedicion -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                     </div>
-                    <input title="Ciudad donde se expidió el documento del comodatario" type="text" class="form-control" name="newComodatarioExpedition" placeholder="Ciudad de expedición" required>
+                    <input title="Ciudad donde se expidió el documento del comodatario" type="text" class="form-control" name="newComodatarioExpedition" placeholder="Ciudad de expedición (Opcional)">
                   </div>
                </div>
              </div>
@@ -159,7 +159,7 @@
                   </div>
             </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fas fa-map-marked-alt"></i></span>
@@ -169,7 +169,7 @@
               </div>
             </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 47.5%">
+              <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
@@ -177,7 +177,7 @@
                   <input class="form-control" type="text" name="newGoodsCity" placeholder="Ciudad de ubicación" title="Ciudad donde se ubicarán los bienes mientrás dure el comodato" required>
                 </div>
               </div>
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
@@ -190,7 +190,7 @@
                
              </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fas fa-bullseye"></i></span>
@@ -200,7 +200,7 @@
               </div>
             </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fas fa-toolbox"></i></span>
@@ -210,7 +210,7 @@
               </div>
             </div>
             <div class="row">
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
@@ -234,7 +234,7 @@
             </div>
              <div class="row">
             <!-- Fecha de inicio -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
@@ -243,7 +243,7 @@
                   </div>
                </div>
             <!-- Fecha de terminacion -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
@@ -254,7 +254,7 @@
              </div>
             <div class="row">
             <!-- Salario -->
-               <div class="form-group ml-3" style="width:96.5%">
+               <div class="form-group col-12">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-dollar-sign"></i></span>
@@ -265,7 +265,7 @@
             </div>
             <div class="row">
             <!-- Ciudad -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
@@ -273,7 +273,7 @@
                     <input type="text" class="form-control" name="newContractCity" placeholder="Ciudad donde se firma" required>
                   </div>
                </div>
-              <div class="form-group ml-3" style="width:47.5%">
+              <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-file-invoice-dollar"></i></span>
@@ -288,7 +288,7 @@
             </div>
              <div class="row">
             <!-- Email -->
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-envelope"></i></span>

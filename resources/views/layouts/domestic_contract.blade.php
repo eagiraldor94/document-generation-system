@@ -41,7 +41,7 @@
                   </div>
             </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fa fa-user"></i></span>
@@ -52,7 +52,7 @@
             </div>
             <!-- Documento -->
             <div class="row">
-              <div class="form-group ml-3" style="width:32%">
+              <div class="form-group col-12 col-sm-4">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-id-card"></i></span>
@@ -65,7 +65,7 @@
                     </select>
                   </div>
                </div>
-               <div class="form-group ml-3" style="width:63%">
+               <div class="form-group col-12 col-sm-8">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
@@ -76,18 +76,18 @@
              </div>
              <div class="row">
             <!-- Ciudad -->
-               <div class="form-group ml-3" style="width:96.5%">
+               <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                     </div>
-                    <input type="text" class="form-control" name="newFirstExpedition" placeholder="Ciudad de expedición del documento" required>
+                    <input type="text" class="form-control" name="newFirstExpedition" placeholder="Ciudad de expedición del documento (Opcional)">
                   </div>
                </div>
              </div>
              <div class="row">
             <!-- Direccion -->
-               <div class="form-group ml-3" style="width:96.5%">
+               <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-home"></i></span>
@@ -98,7 +98,7 @@
              </div>
              <div class="row">
             <!-- Ciudad -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
@@ -113,7 +113,7 @@
                   </div>
             </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fa fa-user"></i></span>
@@ -124,7 +124,7 @@
             </div>
             <!-- Documento -->
             <div class="row">
-              <div class="form-group ml-3" style="width:32%">
+              <div class="form-group col-12 col-sm-4">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-id-card"></i></span>
@@ -136,7 +136,7 @@
                     </select>
                   </div>
                </div>
-               <div class="form-group ml-3" style="width:63%">
+               <div class="form-group col-12 col-sm-8">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
@@ -147,7 +147,7 @@
              </div>
             <!-- Telefono 1 -->
             <div class="row">
-              <div class="form-group ml-3" style="width:47.5%">
+              <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-phone-square"></i></span>
@@ -156,7 +156,7 @@
               </div>
                </div>
             <!-- Email -->
-              <div class="form-group ml-3" style="width:47.5%">
+              <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-envelope"></i></span>
@@ -167,7 +167,7 @@
              </div>
              <div class="row">
             <!-- Direccion -->
-               <div class="form-group ml-3" style="width:96.5%">
+               <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-home"></i></span>
@@ -178,7 +178,7 @@
              </div>
              <div class="row">
             <!-- Ciudad -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marked-alt"></i></span>
@@ -187,7 +187,7 @@
                   </div>
                </div>
             <!-- Ciudad -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
@@ -198,7 +198,7 @@
              </div>
              <div class="row">
             <!-- Lugar de nacimiento -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-compass"></i></span>
@@ -207,7 +207,7 @@
                   </div>
                </div>
             <!-- Fecha de nacimiento -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
@@ -218,7 +218,7 @@
              </div>
              <div class="row">
             <!-- Nacionalidad -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-globe-americas"></i></span>
@@ -227,7 +227,7 @@
                   </div>
                </div>
             <!-- EPS -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-file-medical-alt"></i></span>
@@ -238,7 +238,7 @@
              </div>
              <div class="row">
             <!-- AFP -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-wallet"></i></span>
@@ -247,7 +247,7 @@
                   </div>
                </div>
             <!-- ARP -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-medkit"></i></span>
@@ -263,7 +263,7 @@
             </div>
             <!-- Tipo de contrato -->
             <div class="row">
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-cog"></i></span>
@@ -280,7 +280,7 @@
              </div>
              <div class="row">
             <!-- Ciudad -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
@@ -289,7 +289,7 @@
                   </div>
                </div>
             <!-- Dias de aviso -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-calendar-times"></i></span>
@@ -300,7 +300,7 @@
              </div>
              <div class="row">
             <!-- Fecha de inicio -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
@@ -308,12 +308,12 @@
                     <input id="fecha-inicio"  title="Fecha en que inicia las labores" type="text" class="form-control datepicker" name="newStartDate" placeholder="Fecha de inicio" required>
                   </div>
                </div>
-               <div id="fin" class="ml-3" style="width: 47.5%">
+               <div id="fin" class="form-group col-12 col-sm-6">
                </div>
              </div>
             <div class="row">
             <!-- Salario -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-dollar-sign"></i></span>
@@ -322,7 +322,7 @@
               </div>
                </div>
             <!-- Dias de prueba -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-hourglass-end"></i></span>
@@ -334,7 +334,7 @@
             </div>
             <div class="row">
             <!-- Salario -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-utensils"></i></span>
@@ -343,18 +343,18 @@
               </div>
                </div>
             <!-- Dia de pago -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
                     </div>
-                    <input type="number" class="form-control" name="newPaymentDay" placeholder="Dia de pago" title="Dia del mes en el cuál se realizará el pago" required>
+                    <input id="dia-pago" type="number" class="form-control" name="newPaymentDay" placeholder="Dia de pago" title="Dia del mes en el cuál se realizará el pago" max="30" required>
                   </div>
                </div>
             </div>
             <div class="row">
             <!-- Email -->
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-envelope"></i></span>
@@ -388,4 +388,5 @@
   <script src="/Views/js/datepicker.js"></script>
   <script src="/Views/plugins/datepicker/locales/bootstrap-datepicker.es.js"></script>
   <script src="/Views/js/trabajo.js"></script>
+  <script src="/Views/js/domestico.js"></script>
 @stop

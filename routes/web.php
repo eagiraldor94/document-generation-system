@@ -15,13 +15,13 @@ Route::get('/', function () {
     return redirect('https://ludcis.com');
 });
 Route::get('documentos/{hash}', 'ControladorGeneral@checkDocumento');
-// Route::get('consulta/{word}', 'ControladorBusquedas@buscarDocumentos');
-Route::get('payu/retorno', 'PayUController@goBack');
-Route::post('pago', 'PayUController@redirigirPago');
+//Route::get('informe/{date1}/{date2}', 'ControladorDocumentos@pdfInformeFacturas');
+// Route::get('payu/retorno', 'PayUController@goBack');
+Route::post('pago', 'EpaycoController@redirigirPago');
 
 // Route::get('testbill/{id}', 'ControladorDocumentos@pdfFactura');
 
-// Route::get('testdoc', 'ControladorGeneral@vistaPrueba');
+Route::get('testdoc', 'ControladorGeneral@vistaPrueba');
 
 Route::get('ptransito', 'ControladorGeneral@vistaTransito');
 Route::post('ptransito', 'ControladorDocumentos@pdfTransito');
@@ -29,8 +29,8 @@ Route::post('ptransito', 'ControladorDocumentos@pdfTransito');
 Route::get('prejuridico', 'ControladorGeneral@vistaCobro');
 Route::post('prejuridico', 'ControladorDocumentos@pdfCobro');
 
-// Route::get('pagare', 'ControladorGeneral@vistaPagare');
-// Route::post('pagare', 'ControladorDocumentos@pdfPagare');
+Route::get('pagare', 'ControladorGeneral@vistaPagare');
+Route::post('pagare', 'ControladorDocumentos@pdfPagare');
 
 Route::get('confidencialidad', 'ControladorGeneral@vistaConfidencialidad');
 Route::post('confidencialidad', 'ControladorDocumentos@pdfConfidencialidad');
@@ -38,8 +38,14 @@ Route::post('confidencialidad', 'ControladorDocumentos@pdfConfidencialidad');
 Route::get('ctrabajo', 'ControladorGeneral@vistaTrabajo');
 Route::post('ctrabajo', 'ControladorDocumentos@pdfTrabajo');
 
-// Route::get('cservicios', 'ControladorGeneral@vistaServicios');
-// Route::post('cservicios', 'ControladorDocumentos@pdfServicios');
+Route::get('teletrabajo', 'ControladorGeneral@vistaTeletrabajo');
+Route::post('teletrabajo', 'ControladorDocumentos@pdfTeletrabajo');
+
+Route::get('oteletrabajo', 'ControladorGeneral@vistaOtrosiTeletrabajo');
+Route::post('oteletrabajo', 'ControladorDocumentos@pdfOtrosiTeletrabajo');
+
+Route::get('cservicios', 'ControladorGeneral@vistaServicios');
+Route::post('cservicios', 'ControladorDocumentos@pdfServicios');
 
 Route::get('cdomestico', 'ControladorGeneral@vistaDomestico');
 Route::post('cdomestico', 'ControladorDocumentos@pdfDomestico');
@@ -67,6 +73,14 @@ Route::post('compraventa', 'ControladorDocumentos@pdfCompraventa');
 // return view('layouts.payu_send');
 
 // });
+// Route::get('probar_correo', 'ControladorGeneral@correoPrueba');
+// Route::get('prueba', 'ControladorGeneral@pruebaIp');
+
+Route::get('error_conexion', function () {
+
+return view('layouts.conectivity_error');
+
+});
 
 Route::get('/{any}', function ($any) {
 
@@ -74,6 +88,3 @@ return redirect('https://ludcis.com');
 
 })->where('any', '.*');
 
-
-// Route::get('probar_correo', 'ControladorGeneral@correoPrueba');
-// Route::get('prueba', 'ControladorGeneral@pruebaIp');

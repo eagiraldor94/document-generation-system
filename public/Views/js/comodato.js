@@ -8,7 +8,7 @@ $("#numero-bienes").on("change",function(){
   var bienes = $(this).val();
   for (var i = 1; i <= bienes; i++) {
     $("#lista-bienes").append(
-       '<div class="form-group ml-3" style="width:96.5%">' +
+       '<div class="form-group col-12">' +
         '<div class="input-group mb-3">' +
             '<div class="input-group-prepend d-md-inline-flex">' +
             '<span class="input-group-text"><b>*</b></span>' +
@@ -27,7 +27,7 @@ $("#numero-testigos").on("change",function(){
   for (var i = 1; i <= cuotas; i++) {
     $("#info-testigos").append(
        '<div class="row">'+
-              '<div class="form-group ml-3" style="width: 96.5%">'+
+              '<div class="form-group col-12">'+
                 '<div class="input-group mb-3">'+
                   '<div class="input-group-prepend">'+
                     '<span class="input-group-text"><i class="fa fa-user"></i></span>'+
@@ -37,7 +37,7 @@ $("#numero-testigos").on("change",function(){
              '</div>'+
             '</div>'+
             '<div class="row">'+
-             '<div class="form-group ml-3" style="width:32%">'+
+             '<div class="form-group col-12 col-sm-4">'+
                 '<div class="input-group mb-3">'+
                    '<div class="input-group-prepend d-md-inline-flex">'+
                    '<span class="input-group-text"><i class="fas fa-id-card"></i></span>'+
@@ -49,7 +49,7 @@ $("#numero-testigos").on("change",function(){
                     '</select>'+
                   '</div>'+
                '</div>'+
-               '<div class="form-group ml-3" style="width:63%">'+
+               '<div class="form-group col-12 col-sm-8">'+
                 '<div class="input-group mb-3">'+
                     '<div class="input-group-prepend d-md-inline-flex">'+
                     '<span class="input-group-text"><i class="fas fa-hashtag"></i></span>'+

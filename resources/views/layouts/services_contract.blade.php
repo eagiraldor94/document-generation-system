@@ -40,19 +40,34 @@
                   <input type="hidden" name="newCode" value="{{$code}}">
                   </div>
             </div>
+            <!-- Tipo Contratante -->
+            <div class="row">
+              <div class="form-group col-12">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend d-md-inline-flex">
+                    <span class="input-group-text">Contratante</span>
+                    </div>
+                    <select id="tipo-contratante" name="newFirstType" class="form-control" required>
+                      <option value="">Tipo de entidad</option>
+                      <option value="PN">Persona (Persona Natural)</option>
+                      <option value="PJ">Empresa (Persona Jurídica)</option>
+                    </select>
+                  </div>
+               </div>
+             </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fa fa-user"></i></span>
                   </div>
-                  <input class="form-control" type="text" name="newFirstPart" placeholder="Nombre del Contratante" required>
+                  <input class="form-control" type="text" name="newFirstPart" placeholder="Nombre del Representante o Contratante" required>
                 </div>
               </div>
             </div>
             <!-- Documento -->
             <div class="row">
-              <div class="form-group ml-3" style="width:32%">
+              <div class="form-group col-12 col-sm-4">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-id-card"></i></span>
@@ -64,7 +79,7 @@
                     </select>
                   </div>
                </div>
-               <div class="form-group ml-3" style="width:63%">
+               <div class="form-group col-12 col-sm-8">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
@@ -75,94 +90,24 @@
              </div>
              <div class="row">
             <!-- Ciudad -->
-               <div class="form-group ml-3" style="width:96.5%">
+               <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                     </div>
-                    <input type="text" class="form-control" name="newFirstExpedition" placeholder="Ciudad de expedición del documento" required>
+                    <input type="text" class="form-control" name="newFirstExpedition" placeholder="Ciudad de expedición (Opcional)">
                   </div>
                </div>
              </div>
-            <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
-                <div class="input-group mb-3">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fa fa-user"></i></span>
-                  </div>
-                  <input class="form-control" type="text" name="newFirstCompany" placeholder="Nombre de la Empresa" required>
-                </div>
-              </div>
-            </div>
-            <!-- Documento -->
+             <div id="info-contratante">
+             </div>
             <div class="row">
-              <div class="form-group ml-3" style="width:32%">
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend d-md-inline-flex">
-                    <span class="input-group-text"><i class="fas fa-id-card"></i></span>
-                    </div>
-                    <select name="newFirstCompanyIdType" class="form-control" required>
-                      <option value="">Tipo de documento</option>
-                      <option value="CC">Cedula de ciudadanía</option>
-                      <option value="CE">Cedula de extranjería</option>
-                      <option value="NIT">NIT</option>
-                    </select>
-                  </div>
-               </div>
-               <div class="form-group ml-3" style="width:63%">
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend d-md-inline-flex">
-                    <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
-                    </div>
-                    <input type="text" class="form-control" name="newFirstCompanyId" placeholder="Número del documento" required>
-                  </div>
-               </div>
-             </div>
-             <div class="row">
-            <!-- Direccion -->
-               <div class="form-group ml-3" style="width:47.5%">
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend d-md-inline-flex">
-                    <span class="input-group-text"><i class="fas fa-home"></i></span>
-                    </div>
-                    <input type="text" class="form-control" name="newFirstAddress" placeholder="Dirección de la empresa" required>
-                  </div>
-               </div>
-            <!-- Ciudad -->
-               <div class="form-group ml-3" style="width:47.5%">
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend d-md-inline-flex">
-                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                    </div>
-                    <input type="text" class="form-control" name="newFirstCity" placeholder="Ciudad donde laborará" required>
-                  </div>
-               </div>
-             </div>
-            <div class="row">  
-              <div class="form-group ml-3" style="width: 47.5%">
-                <div class="input-group mb-3">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fa fa-university"></i></span>
-                  </div>
-                  <input class="form-control" type="text" name="newFirstCompanyCamera" placeholder="Camara de comercio donde está inscrita" title='Camara de comercio donde se encuentra matriculada la empresa. Por ejemplo para la camara de comercio de Bogota poner "de Bogota", para la camara de comercio Aburra Sur poner "Aburra Sur"' required>
-                </div>
-              </div>
-              <div class="form-group ml-3" style="width: 47.5%">
-                <div class="input-group mb-3">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fa fa-hashtag"></i></span>
-                  </div>
-                  <input class="form-control" type="number" name="newFirstCompanyCameraNumber" placeholder="No. Certificado de camara de comercio" required>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-phone-square"></i></span>
                 </div>
-                <input class="form-control" type="text" name="newFirstPhone" placeholder="Telefono de la empresa" data-inputmask="'mask':'(999) 999-9999'" data-mask>
+                <input class="form-control" type="text" name="newFirstPhone" placeholder="Telefono del contratante" data-inputmask="'mask':'(999) 999-9999'" data-mask>
               </div>
                </div>
              </div>
@@ -171,8 +116,23 @@
                   <h2>INFORMACIÓN DEL PRESTADOR</h2>
                   </div>
             </div>
+            <!-- Tipo Prestador -->
+            <div class="row">
+              <div class="form-group col-12">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend d-md-inline-flex">
+                    <span class="input-group-text">Prestador</span>
+                    </div>
+                    <select id="tipo-prestador" name="newSecondType" class="form-control" required>
+                      <option value="">Tipo de entidad</option>
+                      <option value="PN">Persona (Persona Natural)</option>
+                      <option value="PJ">Empresa (Persona Jurídica)</option>
+                    </select>
+                  </div>
+               </div>
+             </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fa fa-user"></i></span>
@@ -183,7 +143,7 @@
             </div>
             <!-- Documento -->
             <div class="row">
-              <div class="form-group ml-3" style="width:32%">
+              <div class="form-group col-12 col-sm-4">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-id-card"></i></span>
@@ -196,7 +156,7 @@
                     </select>
                   </div>
                </div>
-               <div class="form-group ml-3" style="width:63%">
+               <div class="form-group col-12 col-sm-8">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
@@ -207,18 +167,20 @@
              </div>
              <div class="row">
             <!-- Ciudad -->
-               <div class="form-group ml-3" style="width:96.5%">
+               <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                     </div>
-                    <input type="text" class="form-control" name="newSecondExpedition" placeholder="Ciudad de expedición del documento" required>
+                    <input type="text" class="form-control" name="newSecondExpedition" placeholder="Ciudad de expedición (Opcional)">
                   </div>
                </div>
              </div>
+             <div id="info-prestador">
+             </div>
             <!-- Telefono 1 -->
             <div class="row">
-              <div class="form-group ml-3" style="width:47.5%">
+              <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-phone-square"></i></span>
@@ -227,7 +189,7 @@
               </div>
                </div>
             <!-- Email -->
-              <div class="form-group ml-3" style="width:47.5%">
+              <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-envelope"></i></span>
@@ -238,7 +200,7 @@
              </div>
              <div class="row">
             <!-- Direccion -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-home"></i></span>
@@ -247,101 +209,63 @@
                   </div>
                </div>
             <!-- Ciudad -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                     </div>
-                    <input title="Ciudad donde reside el prestador" type="text" class="form-control" name="newSecondCity" placeholder="Ciudad de residencia" required>
+                    <input title="Ciudad donde se encuentra la empresa o donde reside el prestador" type="text" class="form-control" name="newSecondCity" placeholder="Ciudad del prestador" required>
                   </div>
                </div>
              </div>
             <div class="row">  
-              <div class="form-group ml-3" style="width: 47.5%">
+              <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fas fa-user-cog"></i></span>
                   </div>
-                  <input class="form-control" type="text" name="newSecondProfesion" placeholder="Profesion del prestador" required>
+                  <input class="form-control" type="text" name="newSecondProfesion" placeholder="Servicio a prestar (Profesión)" required>
                 </div>
               </div>
-              <div class="form-group ml-3" style="width: 47.5%">
+              <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fa fa-user"></i></span>
+                    <div class="input-group-prepend d-md-inline-flex">
+                    <span class="input-group-text">¿Tiene tarjeta profesional?</span>
+                    </div>
+                    <select id="tarjeta-profesional" name="newSecondCard" class="form-control" required>
+                      <option value="">(Si es empresa, ponga No)</option>
+                      <option value="Si">Si</option>
+                      <option value="No">No</option>
+                    </select>
                   </div>
-                  <input class="form-control" type="number" name="newSecondProfesionalCard" placeholder="Tarjeta profesional No." required>
-                </div>
-              </div>
+               </div>
             </div>
-             <div class="row">
-            <!-- Lugar de nacimiento -->
-               <div class="form-group ml-3" style="width:47.5%">
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend d-md-inline-flex">
-                    <span class="input-group-text"><i class="fas fa-compass"></i></span>
-                    </div>
-                    <input title="Ciudad donde nació el prestador" type="text" class="form-control" name="newSecondBornSite" placeholder="Lugar de nacimiento" required>
-                  </div>
-               </div>
-            <!-- Fecha de nacimiento -->
-               <div class="form-group ml-3" style="width:47.5%">
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend d-md-inline-flex">
-                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                    </div>
-                    <input title="fecha en que se expidió el documento del deudor" type="text" class="form-control datepicker" name="newSecondBornDate" placeholder="Fecha de nacimiento" required>
-                  </div>
-               </div>
-             </div>
-             <div class="row">
-            <!-- Nacionalidad -->
-               <div class="form-group ml-3" style="width:47.5%">
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend d-md-inline-flex">
-                    <span class="input-group-text"><i class="fas fa-globe-americas"></i></span>
-                    </div>
-                    <input type="text" class="form-control" name="newSecondNationality" placeholder="Nacionalidad del prestador" required>
-                  </div>
-               </div>
-            <!-- EPS -->
-               <div class="form-group ml-3" style="width:47.5%">
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend d-md-inline-flex">
-                    <span class="input-group-text"><i class="fas fa-file-medical-alt"></i></span>
-                    </div>
-                    <input type="text" class="form-control" name="newSecondEPS" placeholder="EPS del prestador" required>
-                  </div>
-               </div>
-             </div>
-             <div class="row">
-            <!-- AFP -->
-               <div class="form-group ml-3" style="width:47.5%">
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend d-md-inline-flex">
-                    <span class="input-group-text"><i class="fas fa-wallet"></i></span>
-                    </div>
-                    <input title="Fondo de pensiones del prestador" type="text" class="form-control" name="newSecondAFP" placeholder="Fondo de pensiones" required>
-                  </div>
-               </div>
-            <!-- ARP -->
-               <div class="form-group ml-3" style="width:47.5%">
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend d-md-inline-flex">
-                    <span class="input-group-text"><i class="fas fa-medkit"></i></span>
-                    </div>
-                    <input type="text" class="form-control" name="newSecondARP" placeholder="Atención de riesgos profesionales" required>
-                  </div>
-               </div>
-             </div>
+            <div id="info-tp">
+            </div>
             <div class="row">
                   <div class="alert alert-secondary w-100">
                   <h2>INFORMACIÓN ADICIONAL</h2>
                   </div>
             </div>
+            <div class="row">
+              <div class="form-group col-12">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend d-md-inline-flex">
+                    <span class="input-group-text">¿Se presta el servicio en una ubicación especifica?</span>
+                    </div>
+                    <select id="ubicacion-servicio" name="newServiceLocation" class="form-control" required>
+                      <option value="">Seleccione una opción</option>
+                      <option value="Si">Si</option>
+                      <option value="No">No</option>
+                    </select>
+                  </div>
+               </div>
+              </div>
+              <div id="locacion-servicio">
+              </div>
              <div class="row">
             <!-- Cargo -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-user-cog"></i></span>
@@ -350,7 +274,7 @@
                   </div>
                </div>
             <!-- Ciudad -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
@@ -361,7 +285,7 @@
              </div>
              <div class="row">
             <!-- Fecha de inicio -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
@@ -370,7 +294,7 @@
                   </div>
                </div>
             <!-- Fecha de terminacion -->
-               <div class="form-group ml-3" style="width:47.5%">
+               <div class="form-group col-12 col-sm-6">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
@@ -381,7 +305,7 @@
              </div>
             <div class="row">
             <!-- Salario -->
-               <div class="form-group ml-3" style="width:96.5%">
+               <div class="form-group col-12">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-dollar-sign"></i></span>
@@ -391,7 +315,7 @@
                </div>
             </div>
             <div class="row">
-            <div class="form-group ml-3" style="width:96.5%">
+            <div class="form-group col-12">
               <div class="input-group mb-3">
                   <div class="input-group-prepend d-md-inline-flex">
                   <span class="input-group-text"><i class="fas fa-handshake"></i></span>
@@ -413,7 +337,7 @@
              <div id="fechas-pago" class="row mx-auto">
              </div>
             <div class="row">
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend d-md-inline-flex">
                     <span class="input-group-text"><i class="fas fa-file-invoice-dollar"></i></span>
@@ -431,7 +355,7 @@
             </div>
             <div class="row">
             <!-- Facultades del contratista -->
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fas fa-shield-alt"></i></span>
@@ -442,7 +366,7 @@
             </div>
             <div class="row">
             <!-- Email -->
-              <div class="form-group ml-3" style="width:96.5%">
+              <div class="form-group col-12">
                 <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fa fa-envelope"></i></span>
@@ -475,5 +399,5 @@
   <script src="/Views/plugins/datepicker/bootstrap-datepicker.js"></script>
   <script src="/Views/js/datepicker.js"></script>
   <script src="/Views/plugins/datepicker/locales/bootstrap-datepicker.es.js"></script>
-  <script src="/Views/js/servicios.js"></script>
+  <script src="/Views/js/servicios2.js"></script>
 @stop
