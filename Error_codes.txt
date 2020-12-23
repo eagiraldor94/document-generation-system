@@ -1,2 +1,0 @@
-450 == el hash no se encuentra en el sistema, puede haberse modificado al retornar de payu o en la url.
-470 == el pago no se ha comprobado o el documento ya se generó
