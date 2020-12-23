@@ -131,6 +131,22 @@ class ProductsTableSeeder extends Seeder
             'pdf' => 'Views/documents/Manuals/TRABAJO.pdf'
         ]);
        DB::table('products')->insert([
+            'name' => 'cuenta de cobro',
+            'code' => 'CDC016',
+            'view' => 'layouts.charge_resume',
+            'value' => '0',
+            'page' => 'https://ludcis.com/cuenta-de-cobro',
+            'pdf' => 'Views/documents/Manuals/TRABAJO.pdf'
+        ]);
+       DB::table('products')->insert([
+            'name' => 'solicitud de retracto',
+            'code' => 'SDR017',
+            'view' => 'layouts.retract_petition',
+            'value' => '0',
+            'page' => 'https://ludcis.com/solicitud-de-retracto',
+            'pdf' => 'Views/documents/Manuals/TRABAJO.pdf'
+        ]);
+       DB::table('products')->insert([
             'name' => 'prueba',
             'code' => 'TEST000',
             'view' => 'test',

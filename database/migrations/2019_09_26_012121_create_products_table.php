@@ -13,6 +13,7 @@ class CreateProductsTable extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
         Schema::create('products', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
@@ -23,6 +24,7 @@ class CreateProductsTable extends Migration
             $table->string('pdf')->nullable();
             $table->timestamps();
         });
+         Schema::enableForeignKeyConstraints();
     }
 
     /**
@@ -32,6 +34,8 @@ class CreateProductsTable extends Migration
      */
     public function down()
     {
+        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('products');
+         Schema::enableForeignKeyConstraints();
     }
 }

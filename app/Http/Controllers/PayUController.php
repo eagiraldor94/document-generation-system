@@ -122,8 +122,8 @@ class PayUController extends Controller
     			}
     			if ($base>1500) {
 					$refCode = sha1($document->hash.date('Y-m-d-H-i-s'));
-					$merchant = "508029";
-					$account = "512321";
+					$merchant = "";
+					$account = "";
 					$docName= $product->name;
 					$amount = $base + $tax;
 					$hash = $document->hash;

@@ -211,6 +211,16 @@ class ControladorGeneral extends Controller
           return view($product->view,['code'=>$document->hash]);
         }
   }
+    public function vistaCuentaCobro(){
+        $code = 'CDC016';
+        $product = ludcis\Product::where('code',$code)->first();
+        $document = $this->generarRegistro($product,$code);
+        if ($product->value > 0) {
+          return view('layouts.pay_form',['product'=>$product,'document'=>$document]);
+        }else{
+          return view($product->view,['code'=>$document->hash]);
+        }
+  }
     public function vistaConfidencialidad(){
         $code = 'DCC002';
         $product = ludcis\Product::where('code',$code)->first();
@@ -323,6 +333,16 @@ class ControladorGeneral extends Controller
       }
     public function vistaCompraventa(){
         $code = 'DCC013';
+        $product = ludcis\Product::where('code',$code)->first();
+        $document = $this->generarRegistro($product,$code);
+        if ($product->value > 0) {
+          return view('layouts.pay_form',['product'=>$product,'document'=>$document]);
+        }else{
+          return view($product->view,['code'=>$document->hash]);
+        }
+      }
+    public function vistaRetracto(){
+        $code = 'SDR017';
         $product = ludcis\Product::where('code',$code)->first();
         $document = $this->generarRegistro($product,$code);
         if ($product->value > 0) {

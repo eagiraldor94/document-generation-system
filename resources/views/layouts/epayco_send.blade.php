@@ -6,7 +6,7 @@
 <script type="text/javascript" src="https://checkout.epayco.co/checkout.js">   </script>
 <script type="text/javascript">
   var handler = ePayco.checkout.configure({
-          key: '35970ed823db1d2438e599ec2968c947',
+          key: '',
           test: true
         })
 var data={
@@ -28,8 +28,8 @@ var data={
           //Atributos opcionales
           extra1: "{{$hash}}",
           extra2: "{{$post['newBuyer']}}",
-          response: "https://documentos2.ludcis.com/api/epayco/retorno",
-          confirmation: "https://documentos2.ludcis.com/api/confirmations/epayco",
+          response: "",
+          confirmation: "",
 
           //Atributos cliente
           name_billing: "{{$post['newBuyer']}}",

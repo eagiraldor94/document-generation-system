@@ -68,6 +68,12 @@ Route::post('comodato', 'ControladorDocumentos@pdfComodato');
 Route::get('compraventa', 'ControladorGeneral@vistaCompraventa');
 Route::post('compraventa', 'ControladorDocumentos@pdfCompraventa');
 
+Route::get('ccobro', 'ControladorGeneral@vistaCuentaCobro');
+Route::post('ccobro', 'ControladorDocumentos@pdfCuentaCobro');
+
+Route::get('retracto', 'ControladorGeneral@vistaRetracto');
+Route::post('retracto', 'ControladorDocumentos@pdfRetracto');
+
 // Route::get('test', function () {
 
 // return view('layouts.payu_send');

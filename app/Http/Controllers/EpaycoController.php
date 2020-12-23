@@ -149,8 +149,8 @@ class EpaycoController extends Controller
     }
     public function store(){
     	$keyMap = ['AM'=>'American Express','BA'=>'Baloto','CR'=>'Credencial','DC'=>'Diners Club','EF'=>'Efecty','GA'=>'Gana','PR'=>'Punto Red','RS'=>'Red Servi','MC'=>'Mastercard','PSE'=>'PSE','SP'=>'SafetyPay','VS'=>'Visa'];
-		$p_cust_id_cliente = '65776';
-		$p_key             = 'c0dcda717214b46ebb398ec394ae403b3db2fd59';
+		$p_cust_id_cliente = '';
+		$p_key             = '';
 
 		$x_ref_payco      = $_REQUEST['x_ref_payco'];
 		$x_transaction_id = $_REQUEST['x_transaction_id'];
@@ -239,8 +239,8 @@ class EpaycoController extends Controller
     public function goBack(){
 
     	$keyMap = ['AM'=>'American Express','BA'=>'Baloto','CR'=>'Credencial','DC'=>'Diners Club','EF'=>'Efecty','GA'=>'Gana','PR'=>'Punto Red','RS'=>'Red Servi','MC'=>'Mastercard','PSE'=>'PSE','SP'=>'SafetyPay','VS'=>'Visa'];
-		$p_cust_id_cliente = '65776';
-		$p_key             = 'c0dcda717214b46ebb398ec394ae403b3db2fd59';
+		$p_cust_id_cliente = '';
+		$p_key             = '';
 
 		$x_ref_payco      = $_REQUEST['x_ref_payco'];
 		$x_transaction_id = $_REQUEST['x_transaction_id'];

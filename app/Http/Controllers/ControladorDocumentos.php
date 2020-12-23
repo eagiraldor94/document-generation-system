@@ -24,9 +24,9 @@ class ControladorDocumentos extends Controller
         if ($document->product->value > 0 && $document->payment_state == 0) {
           return redirect('/');        
         }
-        // if ($document->document_state == 1) {
-        //   return redirect('/');        
-        // }
+        if ($document->document_state == 1) {
+          return redirect('/');        
+        }
         $datos = $_POST;
         $document->email = $datos['newEmail'];
         setlocale(LC_TIME, 'es_ES');
@@ -35,11 +35,6 @@ class ControladorDocumentos extends Controller
         $hoy = Carbon::now();
         $mes = $this->mesLetras($hoy);
         $fechaFin = Carbon::createFromFormat('d/m/Y',$datos['newPaymentDate']);
-        // $meses = floor($hoy->diffInMonths($fechaFin));
-        // $interes = $datos['newAmount']*$meses*$datos['newInterest']/100;
-        // $total = $interes + $datos['newAmount'];
-        // $valorLetrasTotal = ludcis\NumeroALetras::convertir($total, 'pesos colombianos', 'centavos');
-        // $valorLetrasTotal .=' (COP).';
         switch ($datos['newFeesType']) {
           case "Semanal":
             $fecha = $hoy->copy()->addWeek();
@@ -108,6 +103,10 @@ class ControladorDocumentos extends Controller
       $html='<html>
 <head>
 <style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
 * {
   box-sizing: border-box;
 }
@@ -374,6 +373,10 @@ $footer='<table>
       $html='<html>
 <head>
 <style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
 * {
   box-sizing: border-box;
 }
@@ -871,6 +874,10 @@ $footer='<table>
       $html='<html>
 <head>
 <style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
 * {
   box-sizing: border-box;
 }
@@ -1067,6 +1074,10 @@ $footer='<table>
       $html='<html>
 <head>
 <style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
 * {
   box-sizing: border-box;
 }
@@ -1239,6 +1250,10 @@ $footer='<table>
         $html='<html>
 <head>
 <style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
 * {
   box-sizing: border-box;
 }
@@ -1764,6 +1779,10 @@ $footer=
         $html='<html>
 <head>
 <style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
 * {
   box-sizing: border-box;
 }
@@ -2188,6 +2207,10 @@ $footer=
         $html='<html>
 <head>
 <style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
 * {
   box-sizing: border-box;
 }
@@ -2432,6 +2455,10 @@ $footer=
         $html='<html>
 <head>
 <style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
 * {
   box-sizing: border-box;
 }
@@ -2679,6 +2706,10 @@ $footer=
         $html='<html>
 <head>
 <style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
 * {
   box-sizing: border-box;
 }
@@ -2935,6 +2966,10 @@ $footer=
         $html='<html>
 <head>
 <style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
 * {
   box-sizing: border-box;
 }
@@ -3294,6 +3329,10 @@ $footer=
         $html='<html>
 <head>
 <style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
 * {
   box-sizing: border-box;
 }
@@ -4679,6 +4718,10 @@ $footer=
         $html='<html>
 <head>
 <style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
 * {
   box-sizing: border-box;
 }
@@ -5000,6 +5043,10 @@ $footer=
       $html='<html>
 <head>
 <style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
 * {
   box-sizing: border-box;
 }
@@ -5158,6 +5205,432 @@ $footer='<div class="row" style="text-align:center;">
         unlink($document->link);
         $mpdf->Output();
     }
+    public function pdfCuentaCobro(){
+        $document = ludcis\Document::where('hash',$_POST['newCode'])->first();
+        if (!is_object($document)) {
+          return redirect('/');        
+        }
+        if ($document->product->value > 0 && $document->payment_state == 0) {
+          return redirect('/');        
+        }
+        if ($document->document_state == 1) {
+          return redirect('/');        
+        }
+        $datos = $_POST;
+        setlocale(LC_TIME, 'es_ES');
+        date_default_timezone_set('America/Bogota');
+        $inicio = Carbon::createFromFormat('d/m/Y',$datos['newStartDate']);
+        $mesInicio = $this->mesLetras($inicio);
+        $fin = Carbon::createFromFormat('d/m/Y',$datos['newEndDate']);
+        $mesFin = $this->mesLetras($fin);
+        $pago = Carbon::createFromFormat('d/m/Y',$datos['newEndDate']);
+        $mesPago = $this->mesLetras($pago);
+        $valorLetras = ludcis\NumeroALetras::convertir($datos['newAmount'], 'pesos colombianos', 'centavos');
+        $document->email = $datos['newEmail'];
+        $hoy = Carbon::now();
+        $mes = $this->mesLetras($hoy);
+      $qr = QrCode::format('png')->size(400)->errorCorrection('H')->color(60,60,59)->generate($document->product->page);
+      $html='<html>
+<head>
+<style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
+* {
+  box-sizing: border-box;
+}
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 100%;
+}
+tr{
+  width:100%;
+}
+*.backgroung-gray{
+background-color: #666666;
+}
+.row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+.row{
+    width100%;
+}
+[class*="col-"] {
+  float: left;
+  padding: 15px;
+}
+.font-size{
+  font-size:22px;
+}
+.font-size-2{
+  font-size:18px;
+}
+.font-size-3{
+  font-size:16px;
+}
+.font-size-4{
+  font-size:4px;
+}
+.w-100{
+  width:100%;
+}
+.pl{
+  padding-left:5%
+}
+.m1{
+    margin-bottom: 60px;
+    margin-top: 25px;
+}
+.m2{
+    margin-bottom: 15px;
+    margin-top: 15px;
+}
+.m3{
+    margin-top: 35px;
+    margin-bottom: 15px;
+}
+.m4{
+    margin-bottom: 60px;
+}
+*.col-1 {width: 8.33%;}
+*.col-2 {width: 16.66%;}
+*.col-3 {width: 25%;}
+*.col-4 {width: 33.33%;}
+*.col-5 {width: 41.66%;}
+*.col-6 {width: 50%;}
+*.col-7 {width: 58.33%;}
+*.col-8 {width: 66.66%;}
+*.col-9 {width: 75%;}
+*.col-10 {width: 83.33%;}
+*.col-11 {width: 91.66%;}
+*.col-12 {width: 100%;}
+</style>
+</head>
+<body>
+<div class="row m1">
+  <span class="font-size2">'.$datos['newDocumentCity'].', '.$hoy->format('d').' de '.$mes.' de '.$hoy->format('Y').'.</span>
+</div>
+<div class="row m2" style="text-align:center;">
+  <span class="font-size mx-auto" style="text-align:center;"><b>CUENTA DE COBRO</b> </span>
+</div>
+<div class="row m3" style="text-align:center;">
+  <span class="font-size2 mx-auto" style="text-align:center;">
+  '.mb_strtoupper($datos['newDebtor']).'<br> 
+  '.$datos['newDebtorIdType'].' '.$datos['newDebtorId'].'</span>
+</div>
+<div class="row m3">
+  <span class="font-size2"><b>Debe a:</b></span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">'.mb_strtoupper($datos['newCreditor']).'</span>
+</div>
+<div class="row m3">
+  <span class="font-size2"><b>Por concepto de:</b></span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">'.ucfirst($datos['newContract']).': '.ucfirst($datos['newContractDetails']).'.<br>Los cuales corresponden al periodo comprendido entre el '.$inicio->format('d').' de '.$mesInicio.' de '.$inicio->format('Y').' y el '.$fin->format('d').' de '.$mesFin.' de '.$fin->format('Y').'.</span>
+</div>
+<div class="row m2">
+  <span class="font-size2"><b>Por un valor de:</b></span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">'.mb_strtoupper($valorLetras).' ('.number_format($datos['newAmount'],2).').</span>
+</div>
+<div class="row m3" style="text-align:justify;">
+  <span class="font-size2">Favor realizar el pago antes del dia '.$pago->format('d').' de '.$mesPago.' de '.$pago->format('Y');
+  if($datos['newPaymentType']=='Deposito'){
+    $html .=' por transferencia o consignacionen la '.$datos['newPaymentAccount'].' <b>NO.</b> '.$datos['newPaymentNumber'].' del banco <b>'.$datos['newPaymentBank'].'</b>';
+  }else{
+    $html .=' en efectivo.';
+  }
+$html.='</span>
+</div>
+<div class="row m3">
+  <span class="font-size2">Atentamente,</span>
+</div>
+</body>
+</html>';
+$footer=
+'<table style="width:100%">
+  <tr>
+  <td class="col-12">
+  <span class="font-size2" style="font-family:sans-serif; width: 100%">________________________________________________________________</span><br>
+      <span class="font-size start"><b>'.mb_strtoupper($datos['newCreditor']).'</b><br>
+      <b>'.$datos['newCreditorIdType'].'</b> No. <b>'.$datos['newCreditorId'].'</b><br>
+      <b>Correo electrónico:</b> '.$datos['newCreditorEmail'].'<br>
+      <b>Número de contacto:</b> '.$datos['newCreditorPhone'].'<br>
+      <b>Dirección:</b> '.$datos['newCreditorAddress'].' '.ucfirst($datos['newCreditorCity']).'</span>
+  </td>
+  </tr>
+  <tr>
+  <td class="col-12">
+  <br><br>
+  <span class="font-size4" style="font-size:10px;font-family:rubik">________________________________________________________________________________________________________________________________________________________</span><br>
+      <span class="font-size3 start" style="font-size:14px">* Los ingresos correspondientes a este pago pertenecen a rentas de trabajo de acuerdo con el artículo 103 del E.T. <br>
+      * Afirmo ';
+      if ($datos['newQuestion3'] == "No") {
+        $footer.='no ';
+      }
+      $footer .= 'haber contratado o vinculado a dos o más trabajadores asociados a la actividad facturada. <br>';
+      if ($datos['newQuestion3'] == "No" && $datos['newQuestion2'] == "Si" && $datos['newQuestion1'] == "Si") {
+        $footer.='* Manifiesto mi voluntad de acogerme al beneficio de aplicación de la tabla de retención en la fuente contenida en el artículo 383 del E.T. <br>';
+      }else {
+        $footer.='* Manifiesto mi voluntad de no acogerme al beneficio de aplicación de la tabla de retención en la fuente contenida en el artículo 383 del E.T. <br>';
+      }
+      $footer .='</span>
+  </td>
+  </tr>';
+      $footer .= '
+</table>';
+        $mpdf = new \Mpdf\Mpdf([ 
+            'mode' => 'UTF-8', 
+            'default_font' => 'rubik',
+            'format' => 'Letter',]);;
+        $mpdf->SetDisplayMode('fullpage');
+        $mpdf->shrink_tables_to_fit = 1;
+        $mpdf->SetHeader('Codigo ludcis.com|'.$_POST['newCode'].'|{PAGENO}');
+        $mpdf->SetProtection(array('print','print-highres'), '', '');
+        $mpdf->WriteHTML($html);
+        $mpdf->defaultfooterline = 0;
+        $mpdf->setFooter($footer);
+        $codigo = sha1($document->id);
+        $document->link = 'Views/documents/'.$document->product->code.'/cuenta_cobro_'.$codigo.'.pdf';
+        $mpdf->Output('Views/documents/'.$document->product->code.'/cuenta_cobro_'.$codigo.'.pdf','F');
+        $envio = ControladorGeneral::correo(ucwords($datos['newCreditor']),$document->email,$document->product->name,$document->link,$hoy->format('d/m/Y'),$document->product->page,$qr,$document->product->pdf);
+        if ($envio=='ok') {
+          $enviado = new ludcis\Mail_log();
+          $enviado->document_id = $document->id;
+          $enviado->email = $document->email;
+          $enviado->save();          
+        }
+        $document->document_state=1;
+        $document->save();
+        unlink($document->link);
+        $mpdf->Output();
+    }
+    public function pdfRetracto(){
+        $document = ludcis\Document::where('hash',$_POST['newCode'])->first();
+        if (!is_object($document)) {
+          return redirect('/');        
+        }
+        if ($document->product->value > 0 && $document->payment_state == 0) {
+          return redirect('/');        
+        }
+        // if ($document->document_state == 1) {
+        //   return redirect('/');        
+        // }
+        $datos = $_POST;
+        $document->email = $datos['newEmail'];
+        setlocale(LC_TIME, 'es_ES');
+        date_default_timezone_set('America/Bogota');
+        $hoy = Carbon::now();
+        $mes = $this->mesLetras($hoy);
+        $valorLetras = ludcis\NumeroALetras::convertir($datos['newAmount'], 'pesos colombianos', 'centavos');
+        if ($datos['newSignDate']!="" && $datos['newSignDate']!=null) {
+          $firma = Carbon::createFromFormat('d/m/Y',$datos['newSignDate']);
+          $mesFirma = $this->mesLetras($firma);
+        }
+      $qr = QrCode::format('png')->size(400)->errorCorrection('H')->color(60,60,59)->generate($document->product->page);
+      $html='<html>
+<head>
+<style>
+body {
+    background: url("Views/img/plantilla/FONDO_DOCUMENTO.png") no-repeat 0 0;
+    background-image-resize: 6;
+}
+* {
+  box-sizing: border-box;
+}
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 100%;
+}
+tr{
+  width:100%;
+}
+*.backgroung-gray{
+background-color: #666666;
+}
+.row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+.row{
+    width100%;
+}
+[class*="col-"] {
+  float: left;
+  padding: 15px;
+}
+.font-size{
+  font-size:25px;
+}
+.font-size-2{
+  font-size:18px;
+}
+.font-size-3{
+  font-size:16px;
+}
+.w-100{
+  width:100%;
+}
+.pl{
+  padding-left:5%
+}
+.m1{
+    margin-bottom: 60px;
+    margin-top: 25px;
+}
+.m2{
+    margin-bottom: 15px;
+}
+.m3{
+    margin-top: 20px;
+}
+.m4{
+    margin-bottom: 30px;
+}
+*.col-1 {width: 8.33%;}
+*.col-2 {width: 16.66%;}
+*.col-3 {width: 25%;}
+*.col-4 {width: 33.33%;}
+*.col-5 {width: 41.66%;}
+*.col-6 {width: 50%;}
+*.col-7 {width: 58.33%;}
+*.col-8 {width: 66.66%;}
+*.col-9 {width: 75%;}
+*.col-10 {width: 83.33%;}
+*.col-11 {width: 91.66%;}
+*.col-12 {width: 100%;}
+</style>
+</head>
+<body>
+<div class="row m1">
+  <span class="font-size2">'.ucfirst($datos['newDocumentCity']).', '.$hoy->format('d').' de '.$mes.' de '.$hoy->format('Y').'.</span>
+</div>
+<div class="row m1">
+  <span class="font-size2">Señor(es):<br>
+  '.mb_strtoupper($datos['newSeller']).'<br>
+  '.$datos['newSellerIdType'].' '.$datos['newSellerId'].'<br>
+  '.$datos['newSellerAddress'].'<br> 
+  '.$datos['newSellerCity'].'</span>
+</div>
+<div class="row m1">
+  <span class="font-size2"><b>Asunto:</b> Retracto de compra. </span>
+</div>
+<div class="row m4">
+  <span class="font-size2">Estimados señor(es):</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">Por medio de la presente, yo ';
+  if ($datos['newBuyerType']=='Empresa') {
+     $html.= mb_strtoupper($datos['newRepresentative']).', identificado (a) con '.$datos['newRepresentativeIdType'].' No. '.$datos['newRepresentativeIdNumber'].', actuando en nombre y representación de '.mb_strtoupper($datos['newBuyer']).' identificada con '.$datos['newBuyerIdType'].' No. '.$datos['newBuyerId'];
+   }else {
+     $html.= mb_strtoupper($datos['newBuyer']).', identificado (a) con '.$datos['newBuyerIdType'].' No. '.$datos['newBuyerId'];
+   } 
+   $html.=' me permito comunicar el ejercicio del derecho de retracto sobre:</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <ul>
+    <li><span class="font-size2"> El '.$datos['newProductType'].': '.$datos['newContractDetails'].' el cual ';
+    if ($datos['newContractSign']=='No') {
+      $html.='NO ';
+    }
+    if ($datos['newProductType']=='Producto') {
+      $html.= 'fue entregado';
+    }else{
+      $html.= 'posee contrato firmado';
+    }
+    if ($datos['newContractSign'] == 'Si') {
+      $html.= ' el día '.$hoy->format('d').' de '.$mes.' de '.$hoy->format('Y').'.<br>';
+    }else{
+      $html.= '.<br>';
+    }
+    $html.='Lo anterior a razón de: '.$datos['newRetractDetails'].'.</span></li>
+  </ul>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">Considerando que, la adquisición de el(los) anterior(es) '.$datos['newProductType'].'(s) NO se realizó de manera presencial, razón por la cual, la venta objeto de retracto se enmarca dentro de la definición de “ventas que utilizan métodos no tradicionales o a distancia” de la que trata el artículo 47 de la Ley 1480 de 2011 (Estatuto del Consumidor), en concordancia con el numeral 15 y 16 del artículo 5 de la misma ley, debido a que la compra se efectuó por medio de '.$datos['newBuyChannel'].'.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">Además, el Artículo 47 del Estatuto del Consumidor establece que una persona podrá ejercer el derecho al retracto de una compra dentro de los cinco (5) días hábiles desde la entrega del bien o la celebración del contrato.</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">“<b>Artículo 47. Retracto:</b> En todos los contratos para la venta de bienes y prestación de servicios mediante sistemas de financiación otorgada por el productor o proveedor, venta de tiempos compartidos o ventas que utilizan métodos no tradicionales o a distancia, que por su naturaleza no deban consumirse o no hayan comenzado a ejecutarse antes de cinco (5) días, se entenderá pactado el derecho de retracto por parte del consumidor En el evento en que se haga uso de la facultad de retracto, se resolverá el contrato y se deberá reintegrar el dinero que el consumidor hubiese pagado.<br>El consumidor deberá devolver el producto al productor o proveedor por los mismos medios y en las mismas condiciones en que lo recibió. Los costos de transporte y los demás que conlleve la devolución del bien serán cubiertos por el consumidor.<br><u>El término máximo para ejercer el derecho de retracto será de cinco (5) días hábiles contados a partir de la entrega del bien o de la celebración del contrato en caso de la prestación de servicios.</u>”
+</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">Así las cosas, y considerando que no se ha superado el tiempo de cinco (5) días hábiles de los que habla la norma anteriormente señalada, solicito amablemente el reintegro de '.$valorLetras.' ($'.number_format($datos['newAmount']).' COP), valor que fue pagado por la adquisición de el/los '.$datos['newProductType'].'(s) antes referenciado(s). Dicho valor deberá ';
+  if($datos['newPaymentType']=='Deposito'){
+    $html .='ser transferido a la '.$datos['newPaymentAccount'].' <b>NO.</b> '.$datos['newPaymentNumber'].' del banco <b>'.$datos['newPaymentBank'].'</b> dentro de los treinta (30) días calendario contados desde la recepción de este comunicado.';
+  }elseif ($datos['newPaymentType']=='Efectivo') {
+    $html .='ser entregado en efectivo dentro de los treinta (30) días calendario contados desde la recepción de este comunicado.';
+  }else{
+    $html .='verse reflejado como reversión a la tarjeta de crédito con la cuál se realizó la compra dentro de los treinta (30) días calendario contados desde la recepción de este comunicado.';
+  }
+  $html.='</span>
+</div>
+<div class="row m2" style="text-align:justify;">
+  <span class="font-size2">Como soporte de lo anterior se adjunta copia de la factura de compra, en donde se evidencia la fecha y el valor cancelado por el/los '.$datos['newProductType'].'(s).</span>
+</div>
+</body>
+</html>';
+$footer='<table>
+  <tr>
+    <td>
+    <div class="row">
+      <span class="font-size2" style="width: 50%; font-family:sans-serif">___________________________________________________</span><br>
+      <span class="font-size2 m4">En espera de su respuesta,</span><br>';
+
+  if ($datos['newBuyerType']=='Empresa') {
+      $footer.='<span class="font-size3">'.mb_strtoupper($datos['newRepresentative']).'<br>
+      Representante Legal <br>
+      '.mb_strtoupper($datos['newBuyer']).'<br>
+      '.$datos['newBuyerIdType'].'</b> No.'.$datos['newBuyerId'];
+    }else{
+      $footer.='<span class="font-size3">'.mb_strtoupper($datos['newBuyer']).'<br>
+      '.$datos['newBuyerIdType'].'</b> No.'.$datos['newBuyerId'];
+      }
+       $footer.='</span>
+    </td>
+  </tr>
+</table>';
+        $mpdf = new \Mpdf\Mpdf([
+            'default_font' => 'rubik',
+            'mode' => 'utf-8', 
+            'format' => 'Letter',]);;
+        $mpdf->SetDisplayMode('fullpage');
+        $mpdf->shrink_tables_to_fit = 1;
+        $mpdf->SetHeader('Codigo ludcis.com|'.$_POST['newCode'].'|{PAGENO}');
+        $mpdf->SetProtection(array('print','print-highres'), '', '');
+        $mpdf->WriteHTML($html);
+        $mpdf->AddPage();
+        $mpdf->defaultfooterline = 0;
+        $mpdf->setFooter($footer);
+        $codigo = sha1($document->id);
+        $document->link = 'Views/documents/'.$document->product->code.'/retracto_'.$codigo.'.pdf';
+        $mpdf->Output('Views/documents/'.$document->product->code.'/retracto_'.$codigo.'.pdf','F');
+        $envio = 'ok';
+        // $envio = ControladorGeneral::correo(ucwords($datos['newBuyer']),$document->email,$document->product->name,$document->link,$hoy->format('d/m/Y'),$document->product->page,$qr,$document->product->pdf);
+        if ($envio=='ok') {
+          $enviado = new ludcis\Mail_log();
+          $enviado->document_id = $document->id;
+          $enviado->email = $document->email;
+          $enviado->save();          
+        }
+        $document->document_state=1;
+        $document->save();
+        unlink($document->link);
+        $mpdf->Output();
+    } 
     public static function pdfFactura($id){
         setlocale(LC_TIME, 'es_ES');
         date_default_timezone_set('America/Bogota');
